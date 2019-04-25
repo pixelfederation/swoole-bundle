@@ -5,3 +5,4 @@ swoole.pid
 clover.xml
 **/.phpunit.result.cache
 *.tmp
+.env

@@ -1,7 +1,7 @@
 parameters:
     env(PORT): 9501
-    env(HOST): 0.0.0.0
-    env(TRUSTED_HOSTS): localhost,127.0.0.1
+    env(HOST): localhost
+    env(TRUSTED_HOSTS): localhost,127.0.0.1,cli-non-debug-dev
     env(TRUSTED_PROXIES): '*,196.168.0.0/16'
 
 swoole:
