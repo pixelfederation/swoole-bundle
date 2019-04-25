@@ -6,8 +6,6 @@ namespace K911\Swoole\Bridge\Symfony\Bundle\DependencyInjection;
 
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
-use function extension_loaded;
-use function interface_exists;
 use K911\Swoole\Bridge\Doctrine\ORM\EntityManagerHandler;
 use K911\Swoole\Bridge\Symfony\HttpFoundation\CloudFrontRequestFactory;
 use K911\Swoole\Bridge\Symfony\HttpFoundation\RequestFactoryInterface;
@@ -32,8 +30,6 @@ use K911\Swoole\Server\Runtime\HMR\InotifyHMR;
 use K911\Swoole\Server\TaskHandler\TaskHandlerInterface;
 use K911\Swoole\Server\WorkerHandler\HMRWorkerStartHandler;
 use K911\Swoole\Server\WorkerHandler\WorkerStartHandlerInterface;
-use function mb_strtolower;
-use function str_replace;
 use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Definition;
