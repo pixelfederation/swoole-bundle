@@ -11,6 +11,9 @@ interface RequestHandlerInterface
 {
     /**
      * Handles swoole request and modifies swoole response accordingly.
+     *
+     * @param Request  $request
+     * @param Response $response
      */
     public function handle(Request $request, Response $response): void;
 }
