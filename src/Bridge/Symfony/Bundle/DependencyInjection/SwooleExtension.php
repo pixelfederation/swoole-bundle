@@ -34,7 +34,6 @@ use Symfony\Component\Config\FileLocator;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\DependencyInjection\Exception\ServiceNotFoundException;
-use Symfony\Component\DependencyInjection\Extension\PrependExtensionInterface;
 use Symfony\Component\DependencyInjection\Loader\YamlFileLoader;
 use Symfony\Component\DependencyInjection\Reference;
 use Symfony\Component\HttpKernel\DependencyInjection\Extension;
@@ -42,15 +41,8 @@ use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Messenger\Transport\TransportFactoryInterface;
 use function ucfirst;
 
-final class SwooleExtension extends Extension implements PrependExtensionInterface
+final class SwooleExtension extends Extension
 {
-    /**
-     * {@inheritdoc}
-     */
-    public function prepend(ContainerBuilder $container): void
-    {
-    }
-
     /**
      * {@inheritdoc}
      *
@@ -172,6 +164,10 @@ final class SwooleExtension extends Extension implements PrependExtensionInterfa
         ;
     }
 
+    /**
+     * @param array            $config
+     * @param ContainerBuilder $container
+     */
     private function registerHttpServerConfiguration(array $config, ContainerBuilder $container): void
     {
         [
@@ -228,6 +224,10 @@ final class SwooleExtension extends Extension implements PrependExtensionInterfa
         $this->registerHttpServerHMR($hmr, $container);
     }
 
+    /**
+     * @param string           $hmr
+     * @param ContainerBuilder $container
+     */
     private function registerHttpServerHMR(string $hmr, ContainerBuilder $container): void
     {
         if ('off' === $hmr || !$this->isDebug($container)) {
@@ -235,7 +235,12 @@ final class SwooleExtension extends Extension implements PrependExtensionInterfa
         }
 
         if ('inotify' === $hmr) {
-            $container->autowire(HotModuleReloaderInterface::class, InotifyHMR::class)
+            $container->register(InotifyHMR::class)
+                ->setPublic(false)
+                ->addTag('swoole_bundle.bootable_service')
+            ;
+
+            $container->register(HotModuleReloaderInterface::class, InotifyHMR::class)
                 ->setPublic(false)
                 ->addTag('swoole_bundle.bootable_service')
             ;
@@ -250,6 +255,9 @@ final class SwooleExtension extends Extension implements PrependExtensionInterfa
         ;
     }
 
+    /**
+     * @return string
+     */
     private function resolveAutoHMR(): string
     {
         if (extension_loaded('inotify')) {
@@ -316,6 +324,12 @@ final class SwooleExtension extends Extension implements PrependExtensionInterfa
         }
     }
 
+    /**
+     * @param ContainerBuilder $container
+     * @param string           $bundleName
+     *
+     * @return bool
+     */
     private function isBundleLoaded(ContainerBuilder $container, string $bundleName): bool
     {
         $bundles = $container->getParameter('kernel.bundles');
@@ -326,16 +340,31 @@ final class SwooleExtension extends Extension implements PrependExtensionInterfa
         return isset($bundles[$fullBundleName]);
     }
 
+    /**
+     * @param ContainerBuilder $container
+     *
+     * @return bool
+     */
     private function isProd(ContainerBuilder $container): bool
     {
         return 'prod' === $container->getParameter('kernel.environment');
     }
 
+    /**
+     * @param ContainerBuilder $container
+     *
+     * @return bool
+     */
     private function isDebug(ContainerBuilder $container): bool
     {
         return $container->getParameter('kernel.debug');
     }
 
+    /**
+     * @param ContainerBuilder $container
+     *
+     * @return bool
+     */
     private function isDebugOrNotProd(ContainerBuilder $container): bool
     {
         return $this->isDebug($container) || !$this->isProd($container);
