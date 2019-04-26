@@ -4,27 +4,17 @@ declare(strict_types=1);
 
 namespace K911\Swoole\Bridge\Symfony\Bundle\Command;
 
-use function array_filter;
 use Assert\Assertion;
 use Assert\AssertionFailedException;
-use function count;
 use Exception;
-use function filter_var;
-use function implode;
-use function in_array;
 use InvalidArgumentException;
-use function is_string;
 use K911\Swoole\Common\XdebugHandler\XdebugHandler;
-use function K911\Swoole\decode_string_as_set;
-use function K911\Swoole\format_bytes;
-use function K911\Swoole\get_max_memory;
 use K911\Swoole\Server\Config\Socket;
 use K911\Swoole\Server\Configurator\ConfiguratorInterface;
 use K911\Swoole\Server\HttpServer;
 use K911\Swoole\Server\HttpServerConfiguration;
 use K911\Swoole\Server\HttpServerFactory;
 use K911\Swoole\Server\Runtime\BootableInterface;
-use function sprintf;
 use Swoole\Http\Server;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -32,6 +22,16 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\DependencyInjection\ParameterBag\ParameterBagInterface;
+use function array_filter;
+use function count;
+use function filter_var;
+use function implode;
+use function in_array;
+use function is_string;
+use function K911\Swoole\decode_string_as_set;
+use function K911\Swoole\format_bytes;
+use function K911\Swoole\get_max_memory;
+use function sprintf;
 use function var_export;
 
 abstract class AbstractServerStartCommand extends Command
@@ -182,6 +182,7 @@ abstract class AbstractServerStartCommand extends Command
      * @param InputInterface          $input
      *
      * @return array
+     * @throws AssertionFailedException
      */
     protected function prepareRuntimeConfiguration(HttpServerConfiguration $serverConfiguration, InputInterface $input): array
     {
@@ -212,11 +213,13 @@ abstract class AbstractServerStartCommand extends Command
      *
      * @return array
      */
-    protected function prepareConfigurationRowsToPrint(HttpServerConfiguration $serverConfiguration, array $runtimeConfiguration): array
-    {
+    protected function prepareConfigurationRowsToPrint(
+        HttpServerConfiguration $serverConfiguration,
+        array $runtimeConfiguration
+    ): array {
         $rows = [
             ['env', $this->parameterBag->get('kernel.environment')],
-            ['debug', \var_export($this->parameterBag->get('kernel.debug'), true)],
+            ['debug', var_export($this->parameterBag->get('kernel.debug'), true)],
             ['running_mode', $serverConfiguration->getRunningMode()],
             ['worker_count', $serverConfiguration->getWorkerCount()],
             ['reactor_count', $serverConfiguration->getReactorCount()],
@@ -224,10 +227,16 @@ abstract class AbstractServerStartCommand extends Command
             ['trusted_hosts', implode(', ', $runtimeConfiguration['trustedHosts'])],
         ];
 
+        $trustedProxies = '';
+
         if (isset($runtimeConfiguration['trustAllProxies'])) {
-            $rows[] = ['trusted_proxies', '*'];
-        } else {
-            $rows[] = ['trusted_proxies', implode(', ', $runtimeConfiguration['trustedProxies'])];
+            $trustedProxies = '*';
+        } elseif (isset($runtimeConfiguration['trustedProxies'])) {
+            $trustedProxies = implode(', ', $runtimeConfiguration['trustedProxies']);
+        }
+
+        if ($trustedProxies !== '') {
+            $rows[] = ['trusted_proxies', $trustedProxies];
         }
 
         if ($this->serverConfiguration->hasPublicDir()) {
@@ -242,8 +251,11 @@ abstract class AbstractServerStartCommand extends Command
      * @param HttpServer              $server
      * @param SymfonyStyle            $io
      */
-    protected function startServer(HttpServerConfiguration $serverConfiguration, HttpServer $server, SymfonyStyle $io): void
-    {
+    protected function startServer(
+        HttpServerConfiguration $serverConfiguration,
+        HttpServer $server,
+        SymfonyStyle $io
+    ): void {
         $io->comment('Quit the server with CONTROL-C.');
 
         if ($server->start()) {
@@ -255,7 +267,7 @@ abstract class AbstractServerStartCommand extends Command
     }
 
     /**
-     * @throws \Assert\AssertionFailedException
+     * @throws AssertionFailedException
      */
     private function getDefaultPublicDir(): string
     {
@@ -274,10 +286,10 @@ abstract class AbstractServerStartCommand extends Command
             $xdebugHandler->forwardSignals($restartedProcess);
 
             $io->note('Restarting command without Xdebug..');
-            $io->comment(\sprintf(
+            $io->comment(sprintf(
                 "%s\n%s",
                 'Swoole is incompatible with Xdebug. Check https://github.com/swoole/swoole-src/issues/1681 for more information.',
-                \sprintf('Set environment variable "%s=1" to use it anyway.', $xdebugHandler->allowXdebugEnvName())
+                sprintf('Set environment variable "%s=1" to use it anyway.', $xdebugHandler->allowXdebugEnvName())
             ));
 
             if ($this->testing) {
@@ -293,7 +305,7 @@ abstract class AbstractServerStartCommand extends Command
             exit($restartedProcess->getExitCode());
         }
 
-        $io->warning(\sprintf(
+        $io->warning(sprintf(
             "Xdebug is enabled! Command could not be restarted automatically due to lack of \"pcntl\" extension.\nPlease either disable Xdebug or set environment variable \"%s=1\" to disable this message.",
             $xdebugHandler->allowXdebugEnvName()
         ));
@@ -315,16 +327,17 @@ abstract class AbstractServerStartCommand extends Command
      * @param mixed $set
      *
      * @return array
+     * @throws AssertionFailedException
      */
     private function decodeSet($set): array
     {
-        if (\is_string($set)) {
+        if (is_string($set)) {
             return decode_string_as_set($set);
         }
 
         Assertion::isArray($set);
 
-        if (1 === \count($set)) {
+        if (1 === count($set)) {
             return decode_string_as_set($set[0]);
         }
 
