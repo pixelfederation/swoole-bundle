@@ -107,7 +107,7 @@ CMD ["swoole:server:run"]
 FROM base as CliDev
 RUN apk add --no-cache git
 ENV COMPOSER_ALLOW_SUPERUSER="1"
-COPY --chown=app:runner --from=app-installer /usr/bin/composer /usr/local/bin/composer
+COPY --chown=app:runner --from=composer-bin /usr/bin/composer /usr/local/bin/composer
 WORKDIR /usr/src/app/tests/Fixtures/Symfony/app
 ENTRYPOINT ["./console"]
 CMD ["swoole:server:run"]
