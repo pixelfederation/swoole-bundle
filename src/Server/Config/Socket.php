@@ -40,7 +40,11 @@ final class Socket
     private $ssl;
 
     /**
-     * @throws \Assert\AssertionFailedException
+     * @param string $host
+     * @param int    $port
+     * @param string $type
+     * @param bool   $ssl
+     *
      */
     public function __construct(string $host = '0.0.0.0', int $port = 9501, string $type = 'tcp', bool $ssl = false)
     {
@@ -56,7 +60,9 @@ final class Socket
     }
 
     /**
-     * @throws \Assert\AssertionFailedException
+     * @param string $addressPort
+     * @param string $socketType
+     * @param bool   $enableSsl
      *
      * @return Socket
      */
@@ -69,7 +75,7 @@ final class Socket
 
     public function addressPort(): string
     {
-        return \sprintf('%s:%d', $this->host, $this->port);
+        return sprintf('%s:%d', $this->host, $this->port);
     }
 
     public function host(): string

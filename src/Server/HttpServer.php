@@ -4,10 +4,7 @@ declare(strict_types=1);
 
 namespace K911\Swoole\Server;
 
-use function array_key_exists;
 use Assert\AssertionFailedException;
-use function constant;
-use function defined;
 use K911\Swoole\Server\Exception\IllegalInitializationException;
 use K911\Swoole\Server\Exception\NotRunningException;
 use K911\Swoole\Server\Exception\PortUnavailableException;

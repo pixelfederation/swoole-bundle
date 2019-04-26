@@ -5,8 +5,13 @@ declare(strict_types=1);
 namespace K911\Swoole\Server;
 
 use Assert\Assertion;
+use Assert\AssertionFailedException;
 use K911\Swoole\Server\Config\Socket;
 use K911\Swoole\Server\Config\Sockets;
+use function array_key_exists;
+use function array_keys;
+use function sprintf;
+use function swoole_cpu_num;
 
 /**
  * @todo Create interface and split this class
@@ -64,15 +69,17 @@ class HttpServerConfiguration
     private $settings;
 
     /**
-     * @param array $settings settings available:
-     *                        - reactor_count (default: number of cpu cores)
-     *                        - worker_count (default: 2 * number of cpu cores)
-     *                        - task_worker_count (default: unset; "auto" => number of cpu cores; number of task workers)
-     *                        - serve_static_files (default: false)
-     *                        - public_dir (default: '%kernel.root_dir%/public')
-     *                        - buffer_output_size (default: '2097152' unit in byte (2MB))
+     * @param Sockets $sockets
+     * @param string  $runningMode
+     * @param array   $settings    settings available:
+     *                             - reactor_count (default: number of cpu cores)
+     *                             - worker_count (default: 2 * number of cpu cores)
+     *                             - task_worker_count (default: unset; "auto" => number of cpu cores; number of task workers)
+     *                             - serve_static_files (default: false)
+     *                             - public_dir (default: '%kernel.root_dir%/public')
+     *                             - buffer_output_size (default: '2097152' unit in byte (2MB))
      *
-     * @throws \Assert\AssertionFailedException
+     * @throws AssertionFailedException
      */
     public function __construct(Sockets $sockets, string $runningMode = 'process', array $settings = [])
     {
@@ -109,6 +116,9 @@ class HttpServerConfiguration
         return !empty($this->settings[self::SWOOLE_HTTP_SERVER_CONFIG_PUBLIC_DIR]);
     }
 
+    /**
+     * @param Socket $socket
+     */
     public function changeServerSocket(Socket $socket): void
     {
         $this->sockets->changeServerSocket($socket);
@@ -120,7 +130,9 @@ class HttpServerConfiguration
     }
 
     /**
-     * @throws \Assert\AssertionFailedException
+     * @param string $publicDir
+     *
+     * @throws AssertionFailedException
      */
     public function enableServingStaticFiles(string $publicDir): void
     {
@@ -146,14 +158,16 @@ class HttpServerConfiguration
     }
 
     /**
-     * @throws \Assert\AssertionFailedException
+     * @throws AssertionFailedException
+     *
+     * @return int
      */
     public function getPid(): int
     {
         Assertion::true($this->existsPidFile(), 'Could not get pid file. It does not exists or server is not running in background.');
 
         /** @var string $contents */
-        $contents = \file_get_contents($this->getPidFile());
+        $contents = file_get_contents($this->getPidFile());
         Assertion::numeric($contents, 'Contents in pid file is not an integer or it is empty');
 
         return (int) $contents;
@@ -161,11 +175,13 @@ class HttpServerConfiguration
 
     public function existsPidFile(): bool
     {
-        return $this->hasPidFile() && \file_exists($this->getPidFile());
+        return $this->hasPidFile() && file_exists($this->getPidFile());
     }
 
     /**
-     * @throws \Assert\AssertionFailedException
+     * @throws AssertionFailedException
+     *
+     * @return string
      */
     public function getPidFile(): string
     {
@@ -190,11 +206,13 @@ class HttpServerConfiguration
     }
 
     /**
-     * @throws \Assert\AssertionFailedException
+     * @throws AssertionFailedException
+     *
+     * @return string|null
      */
     public function getPublicDir(): string
     {
-        Assertion::true($this->hasPublicDir(), \sprintf('Setting "%s" is not set or empty.', self::SWOOLE_HTTP_SERVER_CONFIG_PUBLIC_DIR));
+        Assertion::true($this->hasPublicDir(), sprintf('Setting "%s" is not set or empty.', self::SWOOLE_HTTP_SERVER_CONFIG_PUBLIC_DIR));
 
         return $this->settings[self::SWOOLE_HTTP_SERVER_CONFIG_PUBLIC_DIR];
     }
@@ -207,6 +225,8 @@ class HttpServerConfiguration
     /**
      * Get settings formatted for swoole http server.
      *
+     * @return array
+     *
      * @see \Swoole\Http\Server::set()
      *
      * @todo create swoole settings transformer
@@ -216,8 +236,8 @@ class HttpServerConfiguration
         $swooleSettings = [];
         foreach ($this->settings as $key => $setting) {
             $swooleSettingKey = self::SWOOLE_HTTP_SERVER_CONFIGURATION[$key];
-            $swooleGetter = \sprintf('getSwoole%s', \str_replace('_', '', $swooleSettingKey));
-            if (\method_exists($this, $swooleGetter)) {
+            $swooleGetter = sprintf('getSwoole%s', str_replace('_', '', $swooleSettingKey));
+            if (method_exists($this, $swooleGetter)) {
                 $setting = $this->{$swooleGetter}();
             }
 
@@ -230,6 +250,8 @@ class HttpServerConfiguration
     }
 
     /**
+     * @return int
+     *
      * @see getSwooleSettings()
      */
     public function getSwooleLogLevel(): int
@@ -238,6 +260,8 @@ class HttpServerConfiguration
     }
 
     /**
+     * @return bool
+     *
      * @see getSwooleSettings()
      */
     public function getSwooleEnableStaticHandler(): bool
@@ -251,7 +275,9 @@ class HttpServerConfiguration
     }
 
     /**
-     * @throws \Assert\AssertionFailedException
+     * @param string|null $pidFile
+     *
+     * @throws AssertionFailedException
      */
     public function daemonize(?string $pidFile = null): void
     {
@@ -270,12 +296,12 @@ class HttpServerConfiguration
     }
 
     /**
-     * @throws \Assert\AssertionFailedException
+     * @throws AssertionFailedException
      */
     private function initializeSettings(array $init): void
     {
         $this->settings = [];
-        $cpuCores = \swoole_cpu_num();
+        $cpuCores = swoole_cpu_num();
 
         if (!isset($init[self::SWOOLE_HTTP_SERVER_CONFIG_REACTOR_COUNT])) {
             $init[self::SWOOLE_HTTP_SERVER_CONFIG_REACTOR_COUNT] = $cpuCores;
@@ -285,7 +311,7 @@ class HttpServerConfiguration
             $init[self::SWOOLE_HTTP_SERVER_CONFIG_WORKER_COUNT] = 2 * $cpuCores;
         }
 
-        if (\array_key_exists(self::SWOOLE_HTTP_SERVER_CONFIG_TASK_WORKER_COUNT, $init) && 'auto' === $init[self::SWOOLE_HTTP_SERVER_CONFIG_TASK_WORKER_COUNT]) {
+        if (array_key_exists(self::SWOOLE_HTTP_SERVER_CONFIG_TASK_WORKER_COUNT, $init) && 'auto' === $init[self::SWOOLE_HTTP_SERVER_CONFIG_TASK_WORKER_COUNT]) {
             $init[self::SWOOLE_HTTP_SERVER_CONFIG_TASK_WORKER_COUNT] = $cpuCores;
         }
 
@@ -293,7 +319,7 @@ class HttpServerConfiguration
     }
 
     /**
-     * @throws \Assert\AssertionFailedException
+     * @throws AssertionFailedException
      */
     private function setSettings(array $settings): void
     {
@@ -311,7 +337,7 @@ class HttpServerConfiguration
     /**
      * @param mixed $value
      *
-     * @throws \Assert\AssertionFailedException
+     * @throws AssertionFailedException
      */
     private function validateSetting(string $key, $value): void
     {
@@ -319,7 +345,7 @@ class HttpServerConfiguration
 
         switch ($key) {
             case self::SWOOLE_HTTP_SERVER_CONFIG_SERVE_STATIC:
-                Assertion::inArray($value, \array_keys(self::SWOOLE_SERVE_STATIC));
+                Assertion::inArray($value, array_keys(self::SWOOLE_SERVE_STATIC));
 
                 break;
             case self::SWOOLE_HTTP_SERVER_CONFIG_DAEMONIZE:
@@ -331,18 +357,18 @@ class HttpServerConfiguration
 
                 break;
             case self::SWOOLE_HTTP_SERVER_CONFIG_LOG_LEVEL:
-                Assertion::inArray($value, \array_keys(self::SWOOLE_LOG_LEVELS));
+                Assertion::inArray($value, array_keys(self::SWOOLE_LOG_LEVELS));
 
                 break;
             case self::SWOOLE_HTTP_SERVER_CONFIG_BUFFER_OUTPUT_SIZE:
-                Assertion::integer($value, \sprintf('Setting "%s" must be an integer.', $key));
+                Assertion::integer($value, sprintf('Setting "%s" must be an integer.', $key));
                 Assertion::greaterThan($value, 0, 'Buffer output size value cannot be negative or zero, "%s" provided.');
 
                 break;
             case self::SWOOLE_HTTP_SERVER_CONFIG_TASK_WORKER_COUNT:
             case self::SWOOLE_HTTP_SERVER_CONFIG_REACTOR_COUNT:
             case self::SWOOLE_HTTP_SERVER_CONFIG_WORKER_COUNT:
-                Assertion::integer($value, \sprintf('Setting "%s" must be an integer.', $key));
+                Assertion::integer($value, sprintf('Setting "%s" must be an integer.', $key));
                 Assertion::greaterThan($value, 0, 'Count value cannot be negative, "%s" provided.');
 
                 break;

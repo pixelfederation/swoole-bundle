@@ -61,9 +61,6 @@
         "symfony/messenger": "To use Symfony Messenger Swoole Task Transport."
     },
     "autoload": {
-        "files": [
-            "src/functions_include.php"
-        ],
         "psr-4": {
             "K911\\Swoole\\": "src"
         }
