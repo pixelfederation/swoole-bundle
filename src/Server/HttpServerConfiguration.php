@@ -8,6 +8,7 @@ use Assert\Assertion;
 use Assert\AssertionFailedException;
 use K911\Swoole\Server\Config\Socket;
 use K911\Swoole\Server\Config\Sockets;
+use K911\Swoole\Server\Config\WorkerEstimator;
 use function array_key_exists;
 use function array_keys;
 use function sprintf;
@@ -35,6 +36,7 @@ class HttpServerConfiguration
      *
      * @see https://github.com/swoole/swoole-docs/blob/master/modules/swoole-server/configuration.md
      * @see https://github.com/swoole/swoole-docs/blob/master/modules/swoole-http-server/configuration.md
+     * @const array<string, string>
      */
     private const SWOOLE_HTTP_SERVER_CONFIGURATION = [
         self::SWOOLE_HTTP_SERVER_CONFIG_REACTOR_COUNT => 'reactor_num',
@@ -49,12 +51,18 @@ class HttpServerConfiguration
         self::SWOOLE_HTTP_SERVER_CONFIG_TASK_WORKER_COUNT => 'task_worker_num',
     ];
 
+    /**
+     * @const array<string, bool>
+     */
     private const SWOOLE_SERVE_STATIC = [
         'off' => false,
         'advanced' => false,
         'default' => true,
     ];
 
+    /**
+     * @const array<string, int>
+     */
     private const SWOOLE_LOG_LEVELS = [
         'debug' => SWOOLE_LOG_DEBUG,
         'trace' => SWOOLE_LOG_TRACE,
@@ -64,11 +72,28 @@ class HttpServerConfiguration
         'error' => SWOOLE_LOG_ERROR,
     ];
 
+    /**
+     * @var WorkerEstimator
+     */
+    private $workerEstimator;
+
+    /**
+     * @var Sockets Sockets
+     */
     private $sockets;
+
+    /**
+     * @var string
+     */
     private $runningMode;
+
+    /**
+     * @var array
+     */
     private $settings;
 
     /**
+     * @param WorkerEstimator $workerEstimator
      * @param Sockets $sockets
      * @param string  $runningMode
      * @param array   $settings    settings available:
@@ -81,8 +106,13 @@ class HttpServerConfiguration
      *
      * @throws AssertionFailedException
      */
-    public function __construct(Sockets $sockets, string $runningMode = 'process', array $settings = [])
-    {
+    public function __construct(
+        WorkerEstimator $workerEstimator,
+        Sockets $sockets,
+        string $runningMode = 'process',
+        array $settings = []
+    ) {
+        $this->workerEstimator = $workerEstimator;
         $this->sockets = $sockets;
 
         $this->changeRunningMode($runningMode);
