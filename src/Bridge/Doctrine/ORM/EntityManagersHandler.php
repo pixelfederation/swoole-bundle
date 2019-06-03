@@ -10,21 +10,14 @@ namespace K911\Swoole\Bridge\Doctrine\ORM;
 
 use Doctrine\Bundle\DoctrineBundle\Registry;
 use Doctrine\Common\Persistence\ObjectManager;
-use Doctrine\DBAL\Connection;
 use Doctrine\ORM\EntityManagerInterface;
-use K911\Swoole\Bridge\Symfony\RequestCycle\InitializerInterface;
-use Symfony\Contracts\Service\ResetInterface;
+use K911\Swoole\Bridge\Symfony\RequestCycle\TerminatorInterface;
 
 /**
  *
  */
-final class EntityManagersHandler implements InitializerInterface, ResetInterface
+final class EntityManagersHandler implements TerminatorInterface
 {
-    /**
-     * @var Connection[]
-     */
-    private $connections;
-
     /**
      * @var EntityManagerInterface[]|ObjectManager[]
      */
@@ -36,30 +29,12 @@ final class EntityManagersHandler implements InitializerInterface, ResetInterfac
     public function __construct(Registry $doctrineRegistry)
     {
         $this->entityManagers = $doctrineRegistry->getManagers();
-        $this->connections = array_map(static function (EntityManagerInterface $entityManager) {
-            return $entityManager->getConnection();
-        }, $this->entityManagers);
     }
 
     /**
-     *
+     * @return void
      */
-    public function initialize(): void
-    {
-        foreach ($this->connections as $connection) {
-            if ($connection->ping()) {
-                continue;
-            }
-
-            $connection->close();
-            $connection->connect();
-        }
-    }
-
-    /**
-     *
-     */
-    public function reset(): void
+    public function terminate(): void
     {
         foreach ($this->entityManagers as $entityManager) {
             $entityManager->clear();

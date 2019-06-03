@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace K911\Swoole\Bridge\Symfony\Bundle\DependencyInjection;
 
+use Doctrine\DBAL\Driver\Connection;
 use Doctrine\ORM\EntityManagerInterface;
 use Exception;
+use K911\Swoole\Bridge\Doctrine\DBAL\ConnectionsHandler;
 use K911\Swoole\Bridge\Doctrine\ORM\EntityManagersHandler;
 use K911\Swoole\Bridge\Symfony\Logging\ChannelFactory;
 use K911\Swoole\Bridge\Symfony\Logging\MasterLogger;
@@ -15,6 +17,7 @@ use K911\Swoole\Bridge\Symfony\HttpFoundation\Session\SetSessionCookieEventListe
 use K911\Swoole\Bridge\Symfony\HttpFoundation\TrustAllProxiesRequestHandler;
 use K911\Swoole\Bridge\Symfony\HttpKernel\DebugHttpKernelRequestHandler;
 use K911\Swoole\Bridge\Symfony\RequestCycle\InitializerInterface;
+use K911\Swoole\Bridge\Symfony\RequestCycle\TerminatorInterface;
 use K911\Swoole\Bridge\Symfony\Messenger\SwooleServerTaskTransportFactory;
 use K911\Swoole\Bridge\Symfony\Messenger\SwooleServerTaskTransportHandler;
 use K911\Swoole\Server\Config\Socket;
@@ -39,11 +42,9 @@ use Symfony\Component\DependencyInjection\Definition;
 use Symfony\Component\DependencyInjection\Exception\ServiceNotFoundException;
 use Symfony\Component\DependencyInjection\Loader\YamlFileLoader;
 use Symfony\Component\DependencyInjection\Reference;
-use Symfony\Component\HttpKernel\DependencyInjection\Extension;
 use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Messenger\Transport\TransportFactoryInterface;
 use Symfony\Component\HttpKernel\DependencyInjection\ConfigurableExtension;
-use Symfony\Contracts\Service\ResetInterface;
 
 final class SwooleExtension extends ConfigurableExtension
 {
@@ -78,6 +79,8 @@ final class SwooleExtension extends ConfigurableExtension
         ;
         $container->registerForAutoconfiguration(InitializerInterface::class)
             ->addTag('swoole_bundle.app_initializer');
+        $container->registerForAutoconfiguration(TerminatorInterface::class)
+            ->addTag('swoole_bundle.app_terminator');
 
         $this->registerHttpServer($mergedConfig['http_server'], $container);
 
@@ -335,13 +338,21 @@ final class SwooleExtension extends ConfigurableExtension
             ;
         }
 
-        // InitializerInterface
-        if (interface_exists(EntityManagerInterface::class) && $this->isBundleLoaded($container, 'doctrine')) {
-            $container->register(EntityManagersHandler::class)
-                ->setArgument('$doctrineRegistry', new Reference('doctrine'))
-                ->setPublic(false)
-                ->addTag('swoole_bundle.app_initializer')
-                ->addTag('kernel.reset', ['method' => 'reset']);
+        // InitializerInterface && TerminatorInterface
+        if ($this->isBundleLoaded($container, 'doctrine')) {
+            if (interface_exists(Connection::class)) {
+                $container->register(ConnectionsHandler::class)
+                    ->setArgument('$doctrineRegistry', new Reference('doctrine'))
+                    ->setPublic(false)
+                    ->addTag('swoole_bundle.app_initializer');
+            }
+
+            if (interface_exists(EntityManagerInterface::class)) {
+                $container->register(EntityManagersHandler::class)
+                    ->setArgument('$doctrineRegistry', new Reference('doctrine'))
+                    ->setPublic(false)
+                    ->addTag('swoole_bundle.app_terminator');
+            }
         }
 
         // Channel logger

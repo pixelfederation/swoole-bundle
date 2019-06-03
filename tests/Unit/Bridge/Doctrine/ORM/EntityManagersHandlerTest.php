@@ -32,55 +32,27 @@ class EntityManagersHandlerTest extends TestCase
     private $entityManagerProphecy;
 
     /**
-     * @var Connection|ObjectProphecy
-     */
-    private $connectionProphecy;
-
-    /**
      *
      */
     protected function setUp(): void
     {
         $this->entityManagerProphecy = $this->prophesize(EntityManagerInterface::class);
         $this->doctrineRegistryProphecy = $this->prophesize(Registry::class);
-        $this->connectionProphecy = $this->prophesize(Connection::class);
 
         /** @var Registry $doctrineRegistryMock */
         $doctrineRegistryMock = $this->doctrineRegistryProphecy->reveal();
 
         $this->setUpRegistryEnityManagers();
-        $this->setUpEntityManagerConnection();
         $this->emHandler = new EntityManagersHandler($doctrineRegistryMock);
     }
 
     /**
      *
      */
-    public function testHandleNoReconnectOnAppInit(): void
-    {
-        $this->connectionProphecy->ping()->willReturn(true)->shouldBeCalled();
-        $this->emHandler->initialize();
-    }
-
-    /**
-     *
-     */
-    public function testHandleEntityManagerClearingOnAppTermination(): void
+    public function testHandleEntityManagerClearingOnAppTerminate(): void
     {
         $this->entityManagerProphecy->clear()->shouldBeCalled();
-        $this->emHandler->reset();
-    }
-
-    /**
-     *
-     */
-    public function testHandleWithReconnectOnAppInit(): void
-    {
-        $this->connectionProphecy->ping()->willReturn(false)->shouldBeCalled();
-        $this->connectionProphecy->close()->shouldBeCalled();
-        $this->connectionProphecy->connect()->willReturn(true)->shouldBeCalled();
-
-        $this->emHandler->initialize();
+        $this->emHandler->terminate();
     }
 
     /**
@@ -89,13 +61,5 @@ class EntityManagersHandlerTest extends TestCase
     private function setUpRegistryEnityManagers(): void
     {
         $this->doctrineRegistryProphecy->getManagers()->willReturn([$this->entityManagerProphecy->reveal()]);
-    }
-
-    /**
-     *
-     */
-    private function setUpEntityManagerConnection(): void
-    {
-        $this->entityManagerProphecy->getConnection()->willReturn($this->connectionProphecy->reveal());
     }
 }
