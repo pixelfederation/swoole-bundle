@@ -13,12 +13,12 @@ use Doctrine\Common\Persistence\ObjectManager;
 use Doctrine\DBAL\Connection;
 use Doctrine\ORM\EntityManagerInterface;
 use K911\Swoole\Bridge\Symfony\RequestCycle\InitializerInterface;
-use K911\Swoole\Bridge\Symfony\RequestCycle\TerminatorInterface;
+use Symfony\Contracts\Service\ResetInterface;
 
 /**
  *
  */
-final class EntityManagersHandler implements InitializerInterface, TerminatorInterface
+final class EntityManagersHandler implements InitializerInterface, ResetInterface
 {
     /**
      * @var Connection[]
@@ -59,7 +59,7 @@ final class EntityManagersHandler implements InitializerInterface, TerminatorInt
     /**
      *
      */
-    public function terminate(): void
+    public function reset(): void
     {
         foreach ($this->entityManagers as $entityManager) {
             $entityManager->clear();

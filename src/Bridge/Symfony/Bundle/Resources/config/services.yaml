@@ -225,11 +225,6 @@ services:
         tags:
           - {name: kernel.event_listener, event: kernel.request, method: initialize, priority: 1000000}
 
-    K911\Swoole\Bridge\Symfony\RequestCycle\Terminators:
-        arguments: [!tagged 'swoole_bundle.app_terminator']
-        tags:
-          - {name: kernel.event_listener, event: kernel.terminate, method: terminate, priority: -1000000}
-
     K911\Swoole\Bridge\Symfony\Logging\ChannelFactory:
         arguments:
            $workerEstimator: '@K911\Swoole\Server\Config\WorkerEstimatorInterface'

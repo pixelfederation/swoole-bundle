@@ -68,7 +68,7 @@ class EntityManagersHandlerTest extends TestCase
     public function testHandleEntityManagerClearingOnAppTermination(): void
     {
         $this->entityManagerProphecy->clear()->shouldBeCalled();
-        $this->emHandler->terminate();
+        $this->emHandler->reset();
     }
 
     /**
