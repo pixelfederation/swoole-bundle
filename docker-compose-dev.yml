@@ -27,6 +27,23 @@ services:
       - swoole-mariadb-dev
     command: ["swoole:server:run", "--api", "--api-port=9601"]
 
+  cli-dev-xdebug:
+    image: "${REGISTRY:-docker.io}/${NAMESPACE:-k911}/${IMAGE:-swoole-bundle-coverage-xdebug}:${TAG:-latest}"
+    build:
+      context: .
+      target: CoverageXdebug
+      args:
+        PHP_TAG: "${PHP_VERSION:-7.3}-cli-alpine${ALPINE_VERSION:-3.9}"
+        PHP_API_VERSION: "${PHP_API_VERSION:-20180731}"
+        COMPOSER_ARGS: "${COMPOSER_ARGS:-install}"
+        SWOOLE_VERSION: "${SWOOLE_VERSION:-4.3.1}"
+    volumes:
+      - ".:/usr/src/app:delegated"
+    environment:
+      - SYMFONY_ENV=dev
+      - APP_ENV=dev
+    entrypoint: ["/usr/local/bin/php", "-S", "localhost:8000", "-t", "."]
+
   # prod environment, debug false - for performance testing
   cli-non-debug-dev:
     image: "${REGISTRY:-docker.io}/${NAMESPACE:-k911}/${IMAGE:-swoole-bundle-cli}:${TAG:-latest}"
