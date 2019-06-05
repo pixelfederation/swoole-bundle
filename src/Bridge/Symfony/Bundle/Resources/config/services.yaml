@@ -230,22 +230,4 @@ services:
         tags:
           - {name: kernel.event_listener, event: kernel.terminate, method: terminate, priority: -1000000}
 
-    K911\Swoole\Bridge\Symfony\Logging\ChannelFactory:
-        arguments:
-           $workerEstimator: '@K911\Swoole\Server\Config\WorkerEstimatorInterface'
-           $workerCount: null
-
-    swoole_bundle.logging_channel:
-        class: Swoole\Coroutine\Channel
-        factory: 'K911\Swoole\Bridge\Symfony\Logging\ChannelFactory:newInstance'
-
-    K911\Swoole\Bridge\Symfony\Logging\ChannelLogger:
-        arguments:
-            - '@swoole_bundle.logging_channel'
-
-    K911\Swoole\Bridge\Symfony\Logging\MasterLogger:
-        arguments:
-            $channel: '@swoole_bundle.logging_channel'
-            $logger: ~ # will be defined by the compiler pass
-
     K911\Swoole\Server\Config\WorkerEstimator:

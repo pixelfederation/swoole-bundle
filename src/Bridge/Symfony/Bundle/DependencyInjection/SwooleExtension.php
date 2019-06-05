@@ -9,8 +9,6 @@ use Doctrine\ORM\EntityManagerInterface;
 use Exception;
 use K911\Swoole\Bridge\Doctrine\DBAL\ConnectionsHandler;
 use K911\Swoole\Bridge\Doctrine\ORM\EntityManagersHandler;
-use K911\Swoole\Bridge\Symfony\Logging\ChannelFactory;
-use K911\Swoole\Bridge\Symfony\Logging\MasterLogger;
 use K911\Swoole\Bridge\Symfony\HttpFoundation\CloudFrontRequestFactory;
 use K911\Swoole\Bridge\Symfony\HttpFoundation\RequestFactoryInterface;
 use K911\Swoole\Bridge\Symfony\HttpFoundation\Session\SetSessionCookieEventListener;
@@ -353,36 +351,6 @@ final class SwooleExtension extends ConfigurableExtension
                     ->setPublic(false)
                     ->addTag('swoole_bundle.app_terminator');
             }
-        }
-
-        // Channel logger
-        if ($servicesConfig['channel_logger']) {
-            $container->setParameter('swoole_bundle.channel_logger', true);
-            $masterLoggerDef = $container->findDefinition(MasterLogger::class);
-            $masterLoggerDef->addTag('kernel.event_listener', [
-                'event' => 'console.command',
-                'method' => 'onInitialize',
-                'priority' => 1000000,
-            ]);
-            $masterLoggerDef->addTag('kernel.event_listener', [
-                'event' => 'console.terminate',
-                'method' => 'onTerminate',
-                'priority' => -1000000,
-            ]);
-
-            if (!isset($httpServerConfig['settings'])) {
-                return;
-            }
-
-            $settings = $httpServerConfig['settings'];
-            $workerCount = null;
-
-            if (isset($settings['worker_count'])) {
-                $workerCount = $settings['worker_count'];
-            }
-
-            $chFactoryDef = $container->findDefinition(ChannelFactory::class);
-            $chFactoryDef->replaceArgument('$workerCount', $workerCount);
         }
 
         if ($servicesConfig['session_cookie_event_listener']) {
