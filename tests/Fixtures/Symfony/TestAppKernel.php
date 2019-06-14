@@ -8,6 +8,7 @@ use Doctrine\Bundle\DoctrineBundle\DoctrineBundle;
 use Doctrine\Bundle\MigrationsBundle\DoctrineMigrationsBundle;
 use Exception;
 use Generator;
+use Go\Symfony\GoAopBundle\GoAopBundle;
 use K911\Swoole\Bridge\Symfony\Bundle\SwooleBundle;
 use K911\Swoole\Tests\Fixtures\Symfony\CoverageBundle\CoverageBundle;
 use K911\Swoole\Tests\Fixtures\Symfony\TestBundle\TestBundle;
@@ -63,6 +64,7 @@ class TestAppKernel extends Kernel
      */
     public function registerBundles(): Generator
     {
+        yield new GoAopBundle();
         yield new FrameworkBundle();
         yield new TwigBundle();
         yield new MonologBundle();

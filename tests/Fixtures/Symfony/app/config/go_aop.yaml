@@ -1,0 +1,12 @@
+go_aop:
+    cache_warmer: true
+    doctrine_support: true
+    options:
+        debug: '%kernel.debug%'
+        app_dir: '%kernel.root_dir%'
+        cache_dir: '%kernel.cache_dir%/aspect'
+        include_paths:
+            - '%kernel.root_dir%/TestBundle'
+        exclude_paths:
+            - '%kernel.root_dir%/../../../vendor'
+            - '%kernel.root_dir%/TestBundle/Test'
