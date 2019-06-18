@@ -31,6 +31,11 @@ final class HmrComposerLoader
     private $decoratedMethod;
 
     /**
+     * @var bool
+     */
+    private $isFinder;
+
+    /**
      * @param LoadedFiles $loadedFiles
      * @param mixed       $decorated
      * @param string      $decoratedMethod
@@ -39,8 +44,8 @@ final class HmrComposerLoader
     {
         $this->loadedFiles = $loadedFiles;
         $this->decorated = $decorated;
-
         $this->decoratedMethod = $decoratedMethod;
+        $this->isFinder = method_exists($decorated, 'findFile');
     }
 
     /**
@@ -62,6 +67,10 @@ final class HmrComposerLoader
      */
     public function findFile($class)
     {
+        if (!$this->isFinder) {
+            return null;
+        }
+
         $file = $this->decorated->findFile($class);
 
         if (is_string($file)) {
