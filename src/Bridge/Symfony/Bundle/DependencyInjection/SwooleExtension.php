@@ -269,18 +269,14 @@ final class SwooleExtension extends ConfigurableExtension
             $container->register(LoadedFiles::class)
                 ->setPublic(true);
 
-            $container->register(InotifyHmrFactory::class)
-                ->setPublic(false)
-                ->setArgument('$files', new Reference(LoadedFiles::class));
-
             $container->register(InotifyHMR::class)
-                ->setFactory([new Reference(InotifyHmrFactory::class), 'getInstance'])
+                ->setArgument('$loadedFiles', new Reference(LoadedFiles::class))
                 ->setPublic(false)
                 ->addTag('swoole_bundle.bootable_service')
             ;
 
             $container->register(HotModuleReloaderInterface::class, InotifyHMR::class)
-                ->setFactory([new Reference(InotifyHmrFactory::class), 'getInstance'])
+                ->setArgument('$loadedFiles', new Reference(LoadedFiles::class))
                 ->setPublic(false)
                 ->addTag('swoole_bundle.bootable_service')
             ;

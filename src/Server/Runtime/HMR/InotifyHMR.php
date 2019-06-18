@@ -65,13 +65,12 @@ final class InotifyHMR implements HotModuleReloaderInterface, BootableInterface
      */
     public function tick(Server $server): void
     {
+        $this->watchFiles();
         $events = inotify_read($this->inotify);
 
         if (false !== $events) {
             $server->reload();
         }
-
-        $this->watchFiles(get_included_files());
     }
 
     /**
@@ -110,9 +109,9 @@ final class InotifyHMR implements HotModuleReloaderInterface, BootableInterface
         }
     }
 
-    private function watchFiles(array $files): void
+    private function watchFiles(): void
     {
-        foreach ($files as $file) {
+        foreach ($this->loadedFiles as $file) {
             if (!isset($this->nonReloadableFiles[$file]) && !isset($this->watchedFiles[$file])) {
                 $this->watchedFiles[$file] = inotify_add_watch($this->inotify, $file, $this->watchMask);
             }
