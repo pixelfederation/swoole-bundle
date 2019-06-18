@@ -26,13 +26,21 @@ final class HmrComposerLoader
     private $decorated;
 
     /**
-     * @param LoadedFiles       $loadedFiles
-     * @param mixed $decorated
+     * @var string
      */
-    public function __construct(LoadedFiles $loadedFiles, $decorated)
+    private $decoratedMethod;
+
+    /**
+     * @param LoadedFiles $loadedFiles
+     * @param mixed       $decorated
+     * @param string      $decoratedMethod
+     */
+    public function __construct(LoadedFiles $loadedFiles, $decorated, string $decoratedMethod)
     {
         $this->loadedFiles = $loadedFiles;
         $this->decorated = $decorated;
+
+        $this->decoratedMethod = $decoratedMethod;
     }
 
     /**
@@ -42,7 +50,7 @@ final class HmrComposerLoader
      */
     public function loadClass($class)
     {
-        $this->decorated->loadClass($class);
+        $this->decorated->{$this->decoratedMethod}($class);
     }
 
     /**

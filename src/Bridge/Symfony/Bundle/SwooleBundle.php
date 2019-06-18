@@ -54,7 +54,8 @@ final class SwooleBundle extends Bundle
         foreach ($loaders as &$loader) {
             $loaderToUnregister = $loader;
             if (is_array($loader) && $loader[0]) {
-                $loader[0] = new HmrComposerLoader($files, $loader[0]);
+                $loader[0] = new HmrComposerLoader($files, $loader[0], $loader[1]);
+                $loader[1] = 'loadClass';
             }
             spl_autoload_unregister($loaderToUnregister);
         }
