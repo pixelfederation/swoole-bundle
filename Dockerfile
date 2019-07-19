@@ -27,6 +27,17 @@ FROM ext-builder as ext-xdebug
 RUN pecl install xdebug && \
     docker-php-ext-enable xdebug
 
+FROM ext-builder as ext-blackfire
+# If you use Alpine, you need to set this value to "alpine"
+ENV current_os=alpine
+RUN version=$(php -r "echo PHP_MAJOR_VERSION.PHP_MINOR_VERSION;") \
+    && curl -A "Docker" -o /tmp/blackfire-probe.tar.gz -D - -L -s https://blackfire.io/api/v1/releases/probe/php/$current_os/amd64/$version \
+    && mkdir -p /tmp/blackfire \
+    && tar zxpf /tmp/blackfire-probe.tar.gz -C /tmp/blackfire \
+    && mv /tmp/blackfire/blackfire-*.so $(php -r "echo ini_get('extension_dir');")/blackfire.so \
+    && printf "extension=blackfire.so\nblackfire.agent_socket=tcp://blackfire:8707\n" > $PHP_INI_DIR/conf.d/blackfire.ini \
+    && rm -rf /tmp/blackfire /tmp/blackfire-probe.tar.gz
+
 FROM ext-builder as ext-swoole
 RUN apk add --no-cache git
 ARG SWOOLE_VERSION="4.4.12"
@@ -62,6 +73,8 @@ COPY --from=ext-pdo_mysql /usr/local/lib/php/extensions/no-debug-non-zts-${PHP_A
 COPY --from=ext-pdo_mysql /usr/local/etc/php/conf.d/docker-php-ext-pdo_mysql.ini /usr/local/etc/php/conf.d/docker-php-ext-pdo_mysql.ini
 COPY --from=ext-apcu /usr/local/lib/php/extensions/no-debug-non-zts-${PHP_API_VERSION}/apcu.so /usr/local/lib/php/extensions/no-debug-non-zts-${PHP_API_VERSION}/apcu.so
 COPY --from=ext-apcu /usr/local/etc/php/conf.d/docker-php-ext-apcu.ini /usr/local/etc/php/conf.d/docker-php-ext-apcu.ini
+COPY --from=ext-blackfire /usr/local/lib/php/extensions/no-debug-non-zts-${PHP_API_VERSION}/blackfire.so /usr/local/lib/php/extensions/no-debug-non-zts-${PHP_API_VERSION}/blackfire.so
+COPY --from=ext-blackfire /usr/local/etc/php/conf.d/blackfire.ini /usr/local/etc/php/conf.d/blackfire.ini
 COPY --from=ext-intl /usr/local/lib/php/extensions/no-debug-non-zts-${PHP_API_VERSION}/intl.so /usr/local/lib/php/extensions/no-debug-non-zts-${PHP_API_VERSION}/intl.so
 COPY --from=ext-intl /usr/local/etc/php/conf.d/docker-php-ext-intl.ini /usr/local/etc/php/conf.d/docker-php-ext-intl.ini
 

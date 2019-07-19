@@ -23,6 +23,8 @@ services:
       - SYMFONY_ENV=dev
       - APP_ENV=dev
       - PORT=9501
+      - BLACKFIRE_CLIENT_ID
+      - BLACKFIRE_CLIENT_TOKEN
     links:
       - swoole-mariadb-dev
     command: ["swoole:server:run", "--api", "--api-port=9601"]
@@ -68,6 +70,13 @@ services:
     links:
       - swoole-mariadb-dev
     command: ["swoole:server:run", "--api", "--api-port=9602"]
+
+  blackfire:
+    image: blackfire/blackfire
+    environment:
+      # Exposes the host BLACKFIRE_SERVER_ID and TOKEN environment variables.
+      - BLACKFIRE_SERVER_ID
+      - BLACKFIRE_SERVER_TOKEN
 
   # nginx - for performance testing comparison
   app-nginx:

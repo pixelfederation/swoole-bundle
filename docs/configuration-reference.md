@@ -65,10 +65,10 @@ swoole:
             # see: \K911\Swoole\Bridge\Symfony\HttpFoundation\CloudFrontRequestFactory
             cloudfront_proto_header_handler: true
             
-            # see: \K911\Swoole\Bridge\Symfony\Bundle\Logging\*
-            # this helps with loggers that are unable tu run in multiple coroutines/processes 
-            # like e.g. ZMQ logger
-            channel_logger: true
+            # this enables profiling using Blackfire (do not use in production)
+            # see: \K911\Swoole\Bridge\Symfony\Profiling\BlackfireHandler
+            # use HTTP HEADER x-blackfire-query with any value to enable profiling of the request
+            blackfire_handler: true
         
         # swoole http server settings
         # see https://www.swoole.co.uk/docs/modules/swoole-server/configuration

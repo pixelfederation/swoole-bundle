@@ -183,6 +183,10 @@ final class Configuration implements ConfigurationInterface
                                 ->defaultFalse()
                                 ->treatNullLike(false)
                                 ->end()
+                                ->booleanNode('blackfire_handler')
+                                    ->defaultNull()
+                                    ->treatNullLike(false)
+                                ->end()
                             ->end()
                         ->end() // drivers
                         ->arrayNode('settings')
