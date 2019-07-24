@@ -14,7 +14,7 @@ final class InotifyHMR implements HotModuleReloaderInterface, BootableInterface
     /**
      * @var LoadedFiles
      */
-    private $loadedFiles;
+    private $composerFiles;
 
     /**
      * @var array file path => true map
@@ -44,7 +44,7 @@ final class InotifyHMR implements HotModuleReloaderInterface, BootableInterface
      */
     public function __construct(LoadedFiles $loadedFiles, array $nonReloadableFiles = [])
     {
-        $this->loadedFiles = $loadedFiles;
+        $this->composerFiles = $loadedFiles;
         Assertion::extensionLoaded('inotify', 'Swoole HMR requires "inotify" PHP Extension present and loaded in the system.');
         $this->watchMask = defined('IN_ATTRIB') ? (int) constant('IN_ATTRIB') : 4;
 
@@ -111,13 +111,15 @@ final class InotifyHMR implements HotModuleReloaderInterface, BootableInterface
 
     private function watchFiles(): void
     {
-        foreach ($this->loadedFiles as $file) {
+        $allLoadedFiles = array_merge($this->composerFiles->toArray(), get_included_files());
+
+        foreach ($allLoadedFiles as $file) {
             if (!isset($this->nonReloadableFiles[$file]) && !isset($this->watchedFiles[$file])) {
                 $this->watchedFiles[$file] = inotify_add_watch($this->inotify, $file, $this->watchMask);
             }
         }
 
-        $this->loadedFiles->clear();
+        $this->composerFiles->clear();
     }
 
     private function initializeInotify(): void

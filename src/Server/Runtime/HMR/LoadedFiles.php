@@ -124,4 +124,13 @@ final class LoadedFiles implements Iterator
         }
 
         $this->index = -1;
-}}
+    }
+
+    /**
+     * @return array
+     */
+    public function toArray(): array
+    {
+        return $this->files;
+    }
+}
