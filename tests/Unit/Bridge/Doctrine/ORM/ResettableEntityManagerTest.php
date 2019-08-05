@@ -16,6 +16,7 @@ use Doctrine\ORM\AbstractQuery;
 use Doctrine\ORM\Cache;
 use Doctrine\ORM\Configuration;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\Internal\Hydration\AbstractHydrator;
 use Doctrine\Common\Persistence\Mapping\ClassMetadata;
 use Doctrine\Common\Persistence\Mapping\ClassMetadataFactory;
@@ -24,11 +25,14 @@ use Doctrine\ORM\Proxy\ProxyFactory;
 use Doctrine\ORM\Query;
 use Doctrine\ORM\Query\Expr;
 use Doctrine\ORM\QueryBuilder;
+use Doctrine\ORM\Repository\RepositoryFactory;
 use Doctrine\ORM\UnitOfWork;
+use Exception;
 use K911\Swoole\Bridge\Doctrine\ORM\ResettableEntityManager;
 use K911\Swoole\Tests\Fixtures\Symfony\TestBundle\Entity\Test;
 use PHPUnit\Framework\TestCase;
 use Prophecy\Argument;
+use Prophecy\Promise\ReturnArgumentPromise;
 use Prophecy\Prophecy\ObjectProphecy;
 use ReflectionException;
 use Symfony\Bridge\Doctrine\RegistryInterface;
@@ -114,6 +118,36 @@ class ResettableEntityManagerTest extends TestCase
         }
 
         self::assertSame($result, $actual);
+    }
+
+    /**
+     * @return void
+     * @throws Exception
+     */
+    public function testGetRepository(): void
+    {
+        $testCase = $this;
+        /* @var $repositoryFactoryMock RepositoryFactory|ObjectProphecy */
+        $repositoryFactoryMock = $this->prophesize(RepositoryFactory::class);
+        $repositoryFactoryMock->getRepository(Argument::type(ResettableEntityManager::class), Argument::cetera())
+            ->shouldBeCalledTimes(1);
+        /* @var $configurationMock Configuration|ObjectProphecy */
+        $configurationMock = $this->prophesize(Configuration::class);
+        $configurationMock->getRepositoryFactory()
+            ->shouldBeCalledTimes(1)
+            ->willReturn($repositoryFactoryMock->reveal());
+        /* @var $emMock EntityManagerInterface */
+        $emMock = $this->prophesize(EntityManagerInterface::class)->reveal();
+        /* @var $registryMock RegistryInterface */
+        $registryMock = $this->prophesize(RegistryInterface::class)->reveal();
+        $em = new ResettableEntityManager(
+            $configurationMock->reveal(),
+            $emMock,
+            $registryMock,
+            'default'
+        );
+        /* @var $repository EntityRepository */
+        $em->getRepository(Test::class);
     }
 
     /**

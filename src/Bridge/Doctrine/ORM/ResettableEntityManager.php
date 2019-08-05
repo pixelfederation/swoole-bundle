@@ -9,9 +9,11 @@ declare(strict_types=1);
 namespace K911\Swoole\Bridge\Doctrine\ORM;
 
 use Doctrine\DBAL\DBALException;
+use Doctrine\ORM\Configuration;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\ORMException;
 use Doctrine\ORM\Query\ResultSetMapping;
+use Doctrine\ORM\Repository\RepositoryFactory;
 use Exception;
 use Symfony\Bridge\Doctrine\RegistryInterface;
 
@@ -20,6 +22,11 @@ use Symfony\Bridge\Doctrine\RegistryInterface;
  */
 class ResettableEntityManager implements EntityManagerInterface
 {
+    /**
+     * @var RepositoryFactory
+     */
+    private $repositoryFactory;
+
     /**
      * @var EntityManagerInterface
      */
@@ -36,15 +43,18 @@ class ResettableEntityManager implements EntityManagerInterface
     private $decoratedName;
 
     /**
+     * @param Configuration          $configuration
      * @param EntityManagerInterface $decorated
      * @param RegistryInterface      $doctrineRegistry
      * @param string                 $decoratedName
      */
     public function __construct(
+        Configuration $configuration,
         EntityManagerInterface $decorated,
         RegistryInterface $doctrineRegistry,
         string $decoratedName
     ) {
+        $this->repositoryFactory = $configuration->getRepositoryFactory();
         $this->decorated = $decorated;
         $this->doctrineRegistry = $doctrineRegistry;
         $this->decoratedName = $decoratedName;
@@ -371,7 +381,7 @@ class ResettableEntityManager implements EntityManagerInterface
      */
     public function getRepository($className)
     {
-        return $this->wrapDecoratedCall(__FUNCTION__, func_get_args());
+        return $this->repositoryFactory->getRepository($this, $className);
     }
 
     /**

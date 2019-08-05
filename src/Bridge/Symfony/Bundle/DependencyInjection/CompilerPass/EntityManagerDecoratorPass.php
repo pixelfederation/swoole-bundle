@@ -27,14 +27,16 @@ final class EntityManagerDecoratorPass implements CompilerPassInterface
         if (!$container->getParameter('swoole_bundle.enabled')) {
             return;
         }
-        
+
         $entityManagers = $container->getParameter('doctrine.entity_managers');
 
         foreach ($entityManagers as $name => $id) {
             $emDefinition = $container->findDefinition($id);
             $newId = $id . '_swoole';
+            $configArg = $emDefinition->getArgument(1);
 
             $decoratorDef = new Definition(ResettableEntityManager::class, [
+                '$configuration' => $configArg,
                 '$decorated' => new Reference($newId),
                 '$doctrineRegistry' => new Reference('doctrine'),
                 '$decoratedName' => $name,
