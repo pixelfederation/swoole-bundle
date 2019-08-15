@@ -36,8 +36,9 @@ final class EntityManagersHandler implements TerminatorInterface
      */
     public function terminate(): void
     {
+        /* @var $entityManager ResettableEntityManager */
         foreach ($this->entityManagers as $entityManager) {
-            $entityManager->clear();
+            $entityManager->clearOrResetIfNeeded();
         }
     }
 }

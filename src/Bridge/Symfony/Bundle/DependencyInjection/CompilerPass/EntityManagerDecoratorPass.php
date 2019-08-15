@@ -37,15 +37,14 @@ final class EntityManagerDecoratorPass implements CompilerPassInterface
 
             $decoratorDef = new Definition(ResettableEntityManager::class, [
                 '$configuration' => $configArg,
-                '$decorated' => new Reference($newId),
+                '$wrapped' => new Reference($newId),
                 '$doctrineRegistry' => new Reference('doctrine'),
                 '$decoratedName' => $name,
             ]);
+            $decoratorDef->setPublic(true);
 
-           $container->setDefinition($id, $decoratorDef);
-           $container->setDefinition($newId, $emDefinition);
-
-            $entityManagers[$name] = $newId;
+            $container->setDefinition($id, $decoratorDef);
+            $container->setDefinition($newId, $emDefinition);
         }
 
         $container->setParameter('doctrine.entity_managers', $entityManagers);

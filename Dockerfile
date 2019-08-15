@@ -55,6 +55,18 @@ RUN pecl install pcov && \
 RUN echo "pcov.enabled=1" >> /usr/local/etc/php/conf.d/docker-php-ext-pcov.ini && \
     echo "pcov.directory=/usr/src/app/src" >> /usr/local/etc/php/conf.d/docker-php-ext-pcov.ini
 
+FROM ext-builder as ext-sdebug
+RUN apk add --no-cache git
+WORKDIR /root
+RUN git clone https://github.com/mabu233/sdebug.git && \
+    cd sdebug && \
+    git checkout sdebug_2_7 && \
+    phpize && \
+    ./configure && \
+    make clean && \
+    make all && \
+    make install
+
 FROM php:$PHP_TAG as base
 WORKDIR /usr/src/app
 RUN addgroup -g 1000 -S runner && \
@@ -119,6 +131,19 @@ CMD ["swoole:server:run"]
 
 FROM base as CliDev
 RUN apk add --no-cache git
+ARG PHP_API_VERSION="20180731"
+COPY --from=ext-sdebug /usr/local/lib/php/extensions/no-debug-non-zts-${PHP_API_VERSION}/xdebug.so /usr/local/lib/php/extensions/no-debug-non-zts-${PHP_API_VERSION}/xdebug.so
+RUN echo "zend_extension=$(find /usr/local/lib/php/extensions/ -name xdebug.so)" > /usr/local/etc/php/conf.d/xdebug.ini && \
+        echo "xdebug.remote_host=docker.for.mac.host.internal" >> /usr/local/etc/php/conf.d/xdebug.ini && \
+        echo 'xdebug.file_link_format="phpstorm://open?url=file://%%f&line=%%l"' >> /usr/local/etc/php/conf.d/xdebug.ini && \
+        echo "xdebug.remote_enable=1" >> /usr/local/etc/php/conf.d/xdebug.ini && \
+        echo "xdebug.remote_autostart=1" >> /usr/local/etc/php/conf.d/xdebug.ini && \
+        echo "xdebug.remote_connect_back=0" >> /usr/local/etc/php/conf.d/xdebug.ini && \
+        echo "xdebug.idekey=PHPSTORM" >> /usr/local/etc/php/conf.d/xdebug.ini && \
+        echo "xdebug.remote_port=9090" >> /usr/local/etc/php/conf.d/xdebug.ini && \
+        echo "xdebug.max_nesting_level=10000" >> /usr/local/etc/php/conf.d/xdebug.ini && \
+        echo "xdebug.remote_handler=dbgp" >> /usr/local/etc/php/conf.d/xdebug.ini && \
+        echo "xdebug.remote_mode=req" >> /usr/local/etc/php/conf.d/xdebug.ini
 ENV COMPOSER_ALLOW_SUPERUSER="1"
 USER app:runner
 COPY --chown=app:runner --from=composer-bin /usr/bin/composer /usr/local/bin/composer

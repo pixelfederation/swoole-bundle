@@ -5,9 +5,8 @@ declare(strict_types=1);
 namespace K911\Swoole\Tests\Unit\Bridge\Doctrine\ORM;
 
 use Doctrine\Bundle\DoctrineBundle\Registry;
-use Doctrine\DBAL\Connection;
-use Doctrine\ORM\EntityManagerInterface;
 use K911\Swoole\Bridge\Doctrine\ORM\EntityManagersHandler;
+use K911\Swoole\Bridge\Doctrine\ORM\ResettableEntityManager;
 use PHPUnit\Framework\TestCase;
 use Prophecy\Prophecy\ObjectProphecy;
 
@@ -27,7 +26,7 @@ class EntityManagersHandlerTest extends TestCase
     private $doctrineRegistryProphecy;
 
     /**
-     * @var EntityManagerInterface|ObjectProphecy
+     * @var ResettableEntityManager|ObjectProphecy
      */
     private $entityManagerProphecy;
 
@@ -36,7 +35,7 @@ class EntityManagersHandlerTest extends TestCase
      */
     protected function setUp(): void
     {
-        $this->entityManagerProphecy = $this->prophesize(EntityManagerInterface::class);
+        $this->entityManagerProphecy = $this->prophesize(ResettableEntityManager::class);
         $this->doctrineRegistryProphecy = $this->prophesize(Registry::class);
 
         /** @var Registry $doctrineRegistryMock */
@@ -51,7 +50,7 @@ class EntityManagersHandlerTest extends TestCase
      */
     public function testHandleEntityManagerClearingOnAppTerminate(): void
     {
-        $this->entityManagerProphecy->clear()->shouldBeCalled();
+        $this->entityManagerProphecy->clearOrResetIfNeeded()->shouldBeCalled();
         $this->emHandler->terminate();
     }
 

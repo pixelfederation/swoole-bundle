@@ -25,6 +25,7 @@ services:
       - PORT=9501
       - BLACKFIRE_CLIENT_ID
       - BLACKFIRE_CLIENT_TOKEN
+      - XDEBUG_CONFIG=remote_host=docker.for.mac.host.internal idekey=PHPSTORM
     links:
       - swoole-mariadb-dev
     command: ["swoole:server:run", "--api", "--api-port=9601"]
