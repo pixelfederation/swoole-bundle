@@ -26,7 +26,7 @@ final class Configuration implements ConfigurationInterface
      *
      * @throws \InvalidArgumentException
      * @throws \RuntimeException
-     * @SuppressWarnings(PHPMD.MethodTooLong)
+     * @SuppressWarnings(PHPMD.ExcessiveMethodLength)
      */
     public function getConfigTreeBuilder(): TreeBuilder
     {
