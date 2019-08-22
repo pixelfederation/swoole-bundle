@@ -25,12 +25,37 @@ services:
       - PORT=9501
       - BLACKFIRE_CLIENT_ID
       - BLACKFIRE_CLIENT_TOKEN
+    links:
+      - swoole-mariadb-dev
+    command: ["swoole:server:run", "--api", "--api-port=9601"]
+
+  cli-dev-sdebug:
+    image: "${REGISTRY:-docker.io}/${NAMESPACE:-k911}/${IMAGE:-swoole-bundle-cli-sdebug}:${TAG:-latest}"
+    build:
+      context: .
+      target: CliDevSdebug
+      args:
+        PHP_TAG: "${PHP_VERSION:-7.3}-cli-alpine${ALPINE_VERSION:-3.9}"
+        PHP_API_VERSION: "${PHP_API_VERSION:-20180731}"
+        COMPOSER_ARGS: "${COMPOSER_ARGS:-install}"
+        SWOOLE_VERSION: "${SWOOLE_VERSION:-4.3.1}"
+    ports:
+      - 9502:9501
+      - 9602:9601
+    volumes:
+      - ".:/usr/src/app:delegated"
+    environment:
+      - SYMFONY_ENV=dev
+      - APP_ENV=dev
+      - PORT=9501
+      - BLACKFIRE_CLIENT_ID
+      - BLACKFIRE_CLIENT_TOKEN
       - XDEBUG_CONFIG=remote_host=docker.for.mac.host.internal idekey=PHPSTORM
     links:
       - swoole-mariadb-dev
     command: ["swoole:server:run", "--api", "--api-port=9601"]
 
-  cli-dev-xdebug:
+  cli-dev-coverage:
     image: "${REGISTRY:-docker.io}/${NAMESPACE:-k911}/${IMAGE:-swoole-bundle-coverage-xdebug}:${TAG:-latest}"
     build:
       context: .
@@ -59,8 +84,8 @@ services:
         COMPOSER_ARGS: "${COMPOSER_ARGS:-install}"
         SWOOLE_VERSION: "${SWOOLE_VERSION:-4.3.1}"
     ports:
-      - 9502:9502
-      - 9602:9602
+      - 9503:9503
+      - 9603:9602
     volumes:
       - ".:/usr/src/app:delegated"
     environment:
@@ -88,7 +113,7 @@ services:
     links:
       - cli-non-debug-dev
     ports:
-      - 9503:80
+      - 9504:80
     volumes:
       - ./docker/nginx/nginx.conf:/etc/nginx/nginx.conf
 

@@ -130,6 +130,13 @@ ENTRYPOINT ["./tests/Fixtures/Symfony/app/console"]
 CMD ["swoole:server:run"]
 
 FROM base as CliDev
+ENV COMPOSER_ALLOW_SUPERUSER="1"
+USER app:runner
+COPY --chown=app:runner --from=app-installer /usr/bin/composer /usr/local/bin/composer
+ENTRYPOINT ["./tests/Fixtures/Symfony/app/console"]
+CMD ["swoole:server:run"]
+
+FROM base as CliDevSdebug
 RUN apk add --no-cache git
 ARG PHP_API_VERSION="20180731"
 COPY --from=ext-sdebug /usr/local/lib/php/extensions/no-debug-non-zts-${PHP_API_VERSION}/xdebug.so /usr/local/lib/php/extensions/no-debug-non-zts-${PHP_API_VERSION}/xdebug.so
