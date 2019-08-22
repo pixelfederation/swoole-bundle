@@ -6,6 +6,7 @@ namespace K911\Swoole\Tests\Unit\Server\Runtime\HMR;
 
 use Assert\InvalidArgumentException;
 use K911\Swoole\Server\Runtime\HMR\InotifyHMR;
+use K911\Swoole\Server\Runtime\HMR\LoadedFilesInterface;
 use PHPUnit\Framework\TestCase;
 
 class InotifyHMRTest extends TestCase
@@ -26,7 +27,9 @@ class InotifyHMRTest extends TestCase
 
     public function testConstructSetGetNonReloadableFiles(): void
     {
-        $hmr = new InotifyHMR(self::NON_RELOADABLE_EXISTING_FILES);
+        /* @var $loadedFiles LoadedFilesInterface */
+        $loadedFiles = $this->prophesize(LoadedFilesInterface::class)->reveal();
+        $hmr = new InotifyHMR($loadedFiles, self::NON_RELOADABLE_EXISTING_FILES);
         $this->assertSame(self::NON_RELOADABLE_EXISTING_FILES, $hmr->getNonReloadableFiles());
     }
 
@@ -37,12 +40,16 @@ class InotifyHMRTest extends TestCase
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage(sprintf('File "%s" was expected to exist.', self::NON_EXISTING_FILE));
 
-        new InotifyHMR([self::NON_EXISTING_FILE]);
+        /* @var $loadedFiles LoadedFilesInterface */
+        $loadedFiles = $this->prophesize(LoadedFilesInterface::class)->reveal();
+        new InotifyHMR($loadedFiles, [self::NON_EXISTING_FILE]);
     }
 
     public function testBootSetGetNonReloadableFiles(): void
     {
-        $hmr = new InotifyHMR();
+        /* @var $loadedFiles LoadedFilesInterface */
+        $loadedFiles = $this->prophesize(LoadedFilesInterface::class)->reveal();
+        $hmr = new InotifyHMR($loadedFiles);
         $hmr->boot(['nonReloadableFiles' => self::NON_RELOADABLE_EXISTING_FILES]);
 
         $expected = array_unique(
@@ -59,7 +66,9 @@ class InotifyHMRTest extends TestCase
     {
         $this->assertFileNotExists(self::NON_EXISTING_FILE);
 
-        $hmr = new InotifyHMR();
+        /* @var $loadedFiles LoadedFilesInterface */
+        $loadedFiles = $this->prophesize(LoadedFilesInterface::class)->reveal();
+        $hmr = new InotifyHMR($loadedFiles);
 
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage(sprintf('File "%s" was expected to exist.', self::NON_EXISTING_FILE));

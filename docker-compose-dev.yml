@@ -1,4 +1,10 @@
 version: "3.6"
+x-env-aliases:
+  &DEFAULT_BUILD_ARGS
+    PHP_TAG: "${PHP_VERSION:-7.3}-cli-alpine${ALPINE_VERSION:-3.10}"
+    PHP_API_VERSION: "${PHP_API_VERSION:-20180731}"
+    COMPOSER_ARGS: "${COMPOSER_ARGS:-install}"
+    SWOOLE_VERSION: "${SWOOLE_VERSION:-4.3.6}"
 
 volumes:
   mariadb_data_volume: {}
@@ -10,10 +16,7 @@ services:
       context: .
       target: CliDev
       args:
-        PHP_TAG: "${PHP_VERSION:-7.3}-cli-alpine${ALPINE_VERSION:-3.9}"
-        PHP_API_VERSION: "${PHP_API_VERSION:-20180731}"
-        COMPOSER_ARGS: "${COMPOSER_ARGS:-install}"
-        SWOOLE_VERSION: "${SWOOLE_VERSION:-4.3.1}"
+        <<: *DEFAULT_BUILD_ARGS
     ports:
       - 9501:9501
       - 9601:9601
@@ -35,10 +38,7 @@ services:
       context: .
       target: CliDevSdebug
       args:
-        PHP_TAG: "${PHP_VERSION:-7.3}-cli-alpine${ALPINE_VERSION:-3.9}"
-        PHP_API_VERSION: "${PHP_API_VERSION:-20180731}"
-        COMPOSER_ARGS: "${COMPOSER_ARGS:-install}"
-        SWOOLE_VERSION: "${SWOOLE_VERSION:-4.3.1}"
+        <<: *DEFAULT_BUILD_ARGS
     ports:
       - 9502:9501
       - 9602:9601
@@ -61,10 +61,7 @@ services:
       context: .
       target: CoverageXdebug
       args:
-        PHP_TAG: "${PHP_VERSION:-7.3}-cli-alpine${ALPINE_VERSION:-3.9}"
-        PHP_API_VERSION: "${PHP_API_VERSION:-20180731}"
-        COMPOSER_ARGS: "${COMPOSER_ARGS:-install}"
-        SWOOLE_VERSION: "${SWOOLE_VERSION:-4.3.1}"
+        <<: *DEFAULT_BUILD_ARGS
     volumes:
       - ".:/usr/src/app:delegated"
     environment:
@@ -79,10 +76,7 @@ services:
       context: .
       target: CliDev
       args:
-        PHP_TAG: "${PHP_VERSION:-7.3}-cli-alpine${ALPINE_VERSION:-3.9}"
-        PHP_API_VERSION: "${PHP_API_VERSION:-20180731}"
-        COMPOSER_ARGS: "${COMPOSER_ARGS:-install}"
-        SWOOLE_VERSION: "${SWOOLE_VERSION:-4.3.1}"
+        <<: *DEFAULT_BUILD_ARGS
     ports:
       - 9503:9503
       - 9603:9602

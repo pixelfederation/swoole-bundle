@@ -12,7 +12,7 @@ use Swoole\Server;
 final class InotifyHMR implements HotModuleReloaderInterface, BootableInterface
 {
     /**
-     * @var LoadedFiles
+     * @var LoadedFilesInterface
      */
     private $composerFiles;
 
@@ -37,12 +37,12 @@ final class InotifyHMR implements HotModuleReloaderInterface, BootableInterface
     private $watchMask;
 
     /**
-     * @param LoadedFiles $loadedFiles
+     * @param LoadedFilesInterface $loadedFiles
      * @param array       $nonReloadableFiles
      *
      * @throws AssertionFailedException
      */
-    public function __construct(LoadedFiles $loadedFiles, array $nonReloadableFiles = [])
+    public function __construct(LoadedFilesInterface $loadedFiles, array $nonReloadableFiles = [])
     {
         $this->composerFiles = $loadedFiles;
         Assertion::extensionLoaded('inotify', 'Swoole HMR requires "inotify" PHP Extension present and loaded in the system.');

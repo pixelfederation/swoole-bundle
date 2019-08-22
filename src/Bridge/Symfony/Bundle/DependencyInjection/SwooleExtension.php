@@ -46,6 +46,11 @@ use Symfony\Component\Messenger\MessageBusInterface;
 use Symfony\Component\Messenger\Transport\TransportFactoryInterface;
 use Symfony\Component\HttpKernel\DependencyInjection\ConfigurableExtension;
 
+/**
+ * Class SwooleExtension
+ *
+ * @SuppressWarnings(PHPMD.CouplingBetweenObjects)
+ */
 final class SwooleExtension extends ConfigurableExtension
 {
     /**

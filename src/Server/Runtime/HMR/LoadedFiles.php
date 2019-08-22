@@ -8,12 +8,10 @@ declare(strict_types=1);
 
 namespace K911\Swoole\Server\Runtime\HMR;
 
-use Iterator;
-
 /**
  *
  */
-final class LoadedFiles implements Iterator
+final class LoadedFiles implements LoadedFilesInterface
 {
     /**
      * @var string[]
