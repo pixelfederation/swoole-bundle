@@ -132,7 +132,7 @@ CMD ["swoole:server:run"]
 FROM base as CliDev
 ENV COMPOSER_ALLOW_SUPERUSER="1"
 USER app:runner
-COPY --chown=app:runner --from=app-installer /usr/bin/composer /usr/local/bin/composer
+COPY --chown=app:runner --from=composer-bin /usr/bin/composer /usr/local/bin/composer
 ENTRYPOINT ["./tests/Fixtures/Symfony/app/console"]
 CMD ["swoole:server:run"]
 

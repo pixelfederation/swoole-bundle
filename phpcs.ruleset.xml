@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+<ruleset name="Pixel">
+
+    <description>Custom PHPCS rule set</description>
+    <exclude-pattern>tests/</exclude-pattern>
+    <config name="installed_paths" value="vendor/phpcompatibility/php-compatibility" />
+
+    <rule ref="PSR2"/>
+    <rule ref="PHPCompatibility"/>
+
+</ruleset>
