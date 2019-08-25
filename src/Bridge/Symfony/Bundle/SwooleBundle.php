@@ -29,17 +29,16 @@ final class SwooleBundle extends Bundle
     public function boot()
     {
         // it is a quick way to check if loader was enabled
-        $wasDebugEnabled = class_exists(DebugClassLoader::class, false);
-        if ($wasDebugEnabled) {
-            // disable temporary to apply AOP loader first
-            DebugClassLoader::disable();
+        $isDebugEnabled = class_exists(DebugClassLoader::class, false);
+
+        if (!$isDebugEnabled) {
+            return;
         }
 
+        // disable temporary to apply HMR loader first
+        DebugClassLoader::disable();
         $this->initHmrComposerLoaders();
-
-        if ($wasDebugEnabled) {
-            DebugClassLoader::enable();
-        }
+        DebugClassLoader::enable();
     }
 
     /**
