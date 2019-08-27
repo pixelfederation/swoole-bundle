@@ -42,6 +42,7 @@ final class EntityManagerDecoratorPass implements CompilerPassInterface
                 '$decoratedName' => $name,
             ]);
             $decoratorDef->setPublic(true);
+            $decoratorDef->setLazy(true);
 
             $container->setDefinition($id, $decoratorDef);
             $container->setDefinition($newId, $emDefinition);
