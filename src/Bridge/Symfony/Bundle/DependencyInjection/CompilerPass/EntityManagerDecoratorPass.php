@@ -8,6 +8,7 @@ declare(strict_types=1);
 
 namespace K911\Swoole\Bridge\Symfony\Bundle\DependencyInjection\CompilerPass;
 
+use K911\Swoole\Bridge\Doctrine\ORM\EntityManagersHandler;
 use K911\Swoole\Bridge\Doctrine\ORM\ResettableEntityManager;
 use Symfony\Component\DependencyInjection\Compiler\CompilerPassInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
@@ -29,6 +30,7 @@ final class EntityManagerDecoratorPass implements CompilerPassInterface
         }
 
         $entityManagers = $container->getParameter('doctrine.entity_managers');
+        $resettableEntityManagers = [];
 
         foreach ($entityManagers as $name => $id) {
             $emDefinition = $container->findDefinition($id);
@@ -42,12 +44,15 @@ final class EntityManagerDecoratorPass implements CompilerPassInterface
                 '$decoratedName' => $name,
             ]);
             $decoratorDef->setPublic(true);
-            $decoratorDef->setLazy(true);
 
+            $entityManagers[$name] = $newId;
+            $resettableEntityManagers[$name] = new Reference($id);
             $container->setDefinition($id, $decoratorDef);
             $container->setDefinition($newId, $emDefinition);
         }
 
         $container->setParameter('doctrine.entity_managers', $entityManagers);
+        $emHandlerDef = $container->findDefinition(EntityManagersHandler::class);
+        $emHandlerDef->setArgument('$entityManagers', $resettableEntityManagers);
     }
 }

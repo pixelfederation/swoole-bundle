@@ -366,7 +366,6 @@ final class SwooleExtension extends ConfigurableExtension
 
             if (interface_exists(EntityManagerInterface::class)) {
                 $container->register(EntityManagersHandler::class)
-                    ->setArgument('$doctrineRegistry', new Reference('doctrine'))
                     ->setPublic(false)
                     ->addTag('swoole_bundle.app_terminator');
             }

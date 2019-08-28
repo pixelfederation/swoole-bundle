@@ -24,11 +24,11 @@ final class EntityManagersHandler implements TerminatorInterface
     private $entityManagers;
 
     /**
-     * @param Registry $doctrineRegistry
+     * @param array $entityManagers[]
      */
-    public function __construct(Registry $doctrineRegistry)
+    public function __construct(array $entityManagers)
     {
-        $this->entityManagers = $doctrineRegistry->getManagers();
+        $this->entityManagers = $entityManagers;
     }
 
     /**
