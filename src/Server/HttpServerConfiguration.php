@@ -143,7 +143,7 @@ class HttpServerConfiguration
 
     public function hasPublicDir(): bool
     {
-        return !empty($this->settings[self::SWOOLE_HTTP_SERVER_CONFIG_PUBLIC_DIR]);
+        return isset($this->settings[self::SWOOLE_HTTP_SERVER_CONFIG_PUBLIC_DIR]);
     }
 
     /**
@@ -326,6 +326,8 @@ class HttpServerConfiguration
     }
 
     /**
+     * @param array $init
+     *
      * @throws AssertionFailedException
      */
     private function initializeSettings(array $init): void
@@ -349,12 +351,15 @@ class HttpServerConfiguration
     }
 
     /**
+     * @param array $settings
+     *
      * @throws AssertionFailedException
      */
     private function setSettings(array $settings): void
     {
         foreach ($settings as $name => $value) {
             if (null !== $value) {
+                $value = $this->filterSetting($name, $value);
                 $this->validateSetting($name, $value);
                 $this->settings[$name] = $value;
             }
@@ -365,7 +370,31 @@ class HttpServerConfiguration
     }
 
     /**
-     * @param mixed $value
+     * @param string $key
+     * @param        $value
+     *
+     * @return mixed
+     */
+    private function filterSetting(string $key, $value)
+    {
+        switch ($key) {
+            case self::SWOOLE_HTTP_SERVER_CONFIG_DAEMONIZE:
+                return (bool) $value;
+                break;
+            case self::SWOOLE_HTTP_SERVER_CONFIG_BUFFER_OUTPUT_SIZE:
+            case self::SWOOLE_HTTP_SERVER_CONFIG_TASK_WORKER_COUNT:
+            case self::SWOOLE_HTTP_SERVER_CONFIG_REACTOR_COUNT:
+            case self::SWOOLE_HTTP_SERVER_CONFIG_WORKER_COUNT:
+                return (int) $value;
+                break;
+            default:
+                return $value;
+        }
+    }
+
+    /**
+     * @param string $key
+     * @param mixed  $value
      *
      * @throws AssertionFailedException
      */
