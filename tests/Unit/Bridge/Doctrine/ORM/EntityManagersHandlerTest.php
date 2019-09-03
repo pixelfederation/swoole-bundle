@@ -21,11 +21,6 @@ class EntityManagersHandlerTest extends TestCase
     private $emHandler;
 
     /**
-     * @var Registry|ObjectProphecy
-     */
-    private $doctrineRegistryProphecy;
-
-    /**
      * @var ResettableEntityManager|ObjectProphecy
      */
     private $entityManagerProphecy;
@@ -37,12 +32,7 @@ class EntityManagersHandlerTest extends TestCase
     {
         $this->entityManagerProphecy = $this->prophesize(ResettableEntityManager::class);
         $this->doctrineRegistryProphecy = $this->prophesize(Registry::class);
-
-        /** @var Registry $doctrineRegistryMock */
-        $doctrineRegistryMock = $this->doctrineRegistryProphecy->reveal();
-
-        $this->setUpRegistryEnityManagers();
-        $this->emHandler = new EntityManagersHandler($doctrineRegistryMock);
+        $this->emHandler = new EntityManagersHandler([$this->entityManagerProphecy->reveal()]);
     }
 
     /**
@@ -52,13 +42,5 @@ class EntityManagersHandlerTest extends TestCase
     {
         $this->entityManagerProphecy->clearOrResetIfNeeded()->shouldBeCalled();
         $this->emHandler->terminate();
-    }
-
-    /**
-     *
-     */
-    private function setUpRegistryEnityManagers(): void
-    {
-        $this->doctrineRegistryProphecy->getManagers()->willReturn([$this->entityManagerProphecy->reveal()]);
     }
 }
