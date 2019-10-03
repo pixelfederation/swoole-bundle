@@ -122,6 +122,8 @@ final class SwooleExtension extends ConfigurableExtension
         $container->setParameter('swoole.http_server.trusted_hosts', $httpServerConfig['trusted_hosts']);
         $container->setParameter('swoole.http_server.api.host', $httpServerConfig['api']['host']);
         $container->setParameter('swoole.http_server.api.port', $httpServerConfig['api']['port']);
+        $container->setParameter('swoole.http_server.settings.reactor_count', $httpServerConfig['settings']['reactor_count']);
+        $container->setParameter('swoole.http_server.settings.worker_count', $httpServerConfig['settings']['worker_count']);
     }
 
     /**

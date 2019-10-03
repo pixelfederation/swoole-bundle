@@ -35,6 +35,12 @@ final class SwooleBundle extends Bundle
             return;
         }
 
+        $isSwooleEnabled = $this->container->getParameter('swoole_bundle.enabled');
+
+        if (!$isSwooleEnabled) {
+            return;
+        }
+
         // disable temporary to apply HMR loader first
         DebugClassLoader::disable();
         $this->initHmrComposerLoaders();
