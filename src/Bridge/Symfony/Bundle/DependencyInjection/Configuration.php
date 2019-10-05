@@ -221,6 +221,15 @@ final class Configuration implements ConfigurationInterface
                         ->end() // settings
                     ->end()
                 ->end() // server
+                ->arrayNode('messenger_workers')
+                    ->addDefaultsIfNotSet()
+                    ->children()
+                        ->booleanNode('enabled')
+                            ->defaultFalse()
+                            ->treatNullLike(false)
+                        ->end()
+                    ->end()
+                ->end() // messenger workers
             ->end()
         ;
 

@@ -88,4 +88,7 @@ swoole:
 
             buffer_output_size: 2097152
             # in bytes, 2097152b = 2 MiB
+    messenger_workers:
+        # messenger workers need to be enabled explicitly
+        enabled: true
 ```

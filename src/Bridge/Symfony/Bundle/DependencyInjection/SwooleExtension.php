@@ -89,7 +89,7 @@ final class SwooleExtension extends ConfigurableExtension
 
         $this->registerHttpServer($mergedConfig['http_server'], $container);
 
-        if (interface_exists(TransportFactoryInterface::class)) {
+        if ($mergedConfig['messenger_workers']['enabled'] && interface_exists(TransportFactoryInterface::class)) {
             $this->registerSwooleServerTransportConfiguration($container);
         }
     }
