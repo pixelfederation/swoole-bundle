@@ -67,6 +67,7 @@ final class SwooleExtension extends ConfigurableExtension
 
         // this is a hack to fulfill Symfony container conditions to use every env variable used in the config
         $this->registerHttpServerParameters($mergedConfig['http_server'], $container);
+        $this->registerDoctrineHandlers($container);
 
         if (!$swooleBundleEnabled) {
             return;
@@ -356,7 +357,13 @@ final class SwooleExtension extends ConfigurableExtension
                 ->setPublic(false)
                 ->setDecoratedService(RequestHandlerInterface::class, null, -49);
         }
+    }
 
+    /**
+     * @param ContainerBuilder $container
+     */
+    private function registerDoctrineHandlers(ContainerBuilder $container)
+    {
         // InitializerInterface && TerminatorInterface
         if ($this->isBundleLoaded($container, 'doctrine')) {
             if (interface_exists(Connection::class)) {

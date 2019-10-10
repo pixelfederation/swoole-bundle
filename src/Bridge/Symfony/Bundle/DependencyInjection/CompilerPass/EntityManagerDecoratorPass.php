@@ -25,10 +25,6 @@ final class EntityManagerDecoratorPass implements CompilerPassInterface
      */
     public function process(ContainerBuilder $container)
     {
-        if (!$container->getParameter('swoole_bundle.enabled')) {
-            return;
-        }
-
         $entityManagers = $container->getParameter('doctrine.entity_managers');
         $resettableEntityManagers = [];
 
