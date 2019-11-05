@@ -29,15 +29,16 @@ final class SwooleBundle extends Bundle
     public function boot()
     {
         // it is a quick way to check if loader was enabled
-        $isDebugEnabled = class_exists(DebugClassLoader::class, false);
+        $isDebugEnabled = $this->container->getParameter('kernel.debug');
 
         if (!$isDebugEnabled) {
             return;
         }
 
         $isSwooleEnabled = $this->container->getParameter('swoole_bundle.enabled');
+        $isHmrEnabled = $this->container->getParameter('swoole_bundle.hmr_enabled');
 
-        if (!$isSwooleEnabled) {
+        if (!$isSwooleEnabled || !$isHmrEnabled) {
             return;
         }
 
