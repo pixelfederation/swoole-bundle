@@ -64,6 +64,7 @@ final class SwooleExtension extends ConfigurableExtension
         $swooleBundleEnabled = $mode === 'strict' || extension_loaded('swoole');
 
         $container->setParameter('swoole_bundle.enabled', $swooleBundleEnabled);
+        $container->setParameter('swoole_bundle.hmr_enabled', false);
 
         // this is a hack to fulfill Symfony container conditions to use every env variable used in the config
         $this->registerHttpServerParameters($mergedConfig['http_server'], $container);
