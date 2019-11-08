@@ -4,19 +4,13 @@ declare(strict_types=1);
 
 namespace K911\Swoole\Bridge\Symfony\Bundle\DependencyInjection;
 
-use Doctrine\DBAL\Driver\Connection;
-use Doctrine\ORM\EntityManagerInterface;
 use Exception;
-use K911\Swoole\Bridge\Doctrine\DBAL\ConnectionsHandler;
-use K911\Swoole\Bridge\Doctrine\ORM\EntityManagersHandler;
 use K911\Swoole\Bridge\Symfony\HttpFoundation\CloudFrontRequestFactory;
 use K911\Swoole\Bridge\Symfony\HttpFoundation\RequestFactoryInterface;
 use K911\Swoole\Bridge\Symfony\HttpFoundation\Session\SetSessionCookieEventListener;
 use K911\Swoole\Bridge\Symfony\HttpFoundation\TrustAllProxiesRequestHandler;
 use K911\Swoole\Bridge\Symfony\HttpKernel\DebugHttpKernelRequestHandler;
 use K911\Swoole\Bridge\Symfony\Profiling\BlackfireHandler;
-use K911\Swoole\Bridge\Symfony\RequestCycle\InitializerInterface;
-use K911\Swoole\Bridge\Symfony\RequestCycle\TerminatorInterface;
 use K911\Swoole\Bridge\Symfony\Messenger\SwooleServerTaskTransportFactory;
 use K911\Swoole\Bridge\Symfony\Messenger\SwooleServerTaskTransportHandler;
 use K911\Swoole\Server\Config\Socket;
@@ -68,7 +62,6 @@ final class SwooleExtension extends ConfigurableExtension
 
         // this is a hack to fulfill Symfony container conditions to use every env variable used in the config
         $this->registerHttpServerParameters($mergedConfig['http_server'], $container);
-        $this->registerDoctrineHandlers($container);
 
         if (!$swooleBundleEnabled) {
             return;
@@ -82,12 +75,7 @@ final class SwooleExtension extends ConfigurableExtension
             ->addTag('swoole_bundle.bootable_service')
         ;
         $container->registerForAutoconfiguration(ConfiguratorInterface::class)
-            ->addTag('swoole_bundle.server_configurator')
-        ;
-        $container->registerForAutoconfiguration(InitializerInterface::class)
-            ->addTag('swoole_bundle.app_initializer');
-        $container->registerForAutoconfiguration(TerminatorInterface::class)
-            ->addTag('swoole_bundle.app_terminator');
+            ->addTag('swoole_bundle.server_configurator');
 
         $this->registerHttpServer($mergedConfig['http_server'], $container);
 
@@ -362,28 +350,6 @@ final class SwooleExtension extends ConfigurableExtension
                 ->setArgument('$decorated', new Reference(BlackfireHandler::class.'.inner'))
                 ->setPublic(false)
                 ->setDecoratedService(RequestHandlerInterface::class, null, -49);
-        }
-    }
-
-    /**
-     * @param ContainerBuilder $container
-     */
-    private function registerDoctrineHandlers(ContainerBuilder $container)
-    {
-        // InitializerInterface && TerminatorInterface
-        if ($this->isBundleLoaded($container, 'doctrine')) {
-            if (interface_exists(Connection::class)) {
-                $container->register(ConnectionsHandler::class)
-                    ->setArgument('$doctrineRegistry', new Reference('doctrine'))
-                    ->setPublic(false)
-                    ->addTag('swoole_bundle.app_initializer');
-            }
-
-            if (interface_exists(EntityManagerInterface::class)) {
-                $container->register(EntityManagersHandler::class)
-                    ->setPublic(false)
-                    ->addTag('swoole_bundle.app_terminator');
-            }
         }
 
         if ($servicesConfig['session_cookie_event_listener']) {

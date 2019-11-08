@@ -12,6 +12,7 @@ use Go\Symfony\GoAopBundle\GoAopBundle;
 use K911\Swoole\Bridge\Symfony\Bundle\SwooleBundle;
 use K911\Swoole\Tests\Fixtures\Symfony\CoverageBundle\CoverageBundle;
 use K911\Swoole\Tests\Fixtures\Symfony\TestBundle\TestBundle;
+use PixelFederation\DoctrineResettableEmBundle\PixelFederationDoctrineResettableEmBundle;
 use Symfony\Bundle\FrameworkBundle\FrameworkBundle;
 use Symfony\Bundle\FrameworkBundle\Kernel\MicroKernelTrait;
 use Symfony\Bundle\MonologBundle\MonologBundle;
@@ -71,6 +72,7 @@ class TestAppKernel extends Kernel
         yield new DoctrineBundle();
         yield new DoctrineMigrationsBundle();
         yield new SwooleBundle();
+        yield new PixelFederationDoctrineResettableEmBundle();
         yield new TestBundle();
 
         if ($this->coverageEnabled) {
