@@ -25,6 +25,7 @@ final class AdvancedStaticFilesServer implements RequestHandlerInterface, Bootab
      * @see https://developer.mozilla.org/en-US/docs/Web/HTTP/Basics_of_HTTP/MIME_types/Complete_list_of_MIME_types
      */
     private const FILE_EXTENSION_MIME_TYPE_MAP = [
+        '*' => 'text/plain', // fallback for other file types which nginx would serve anyway
         '7z' => 'application/x-7z-compressed',
         'aac' => 'audio/aac',
         'arc' => 'application/octet-stream',
@@ -64,6 +65,7 @@ final class AdvancedStaticFilesServer implements RequestHandlerInterface, Bootab
         'pptx' => 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
         'rar' => 'application/x-rar-compressed',
         'rtf' => 'application/rtf',
+        'sqlite' => 'application/x-sqlite3',
         'svg' => 'image/svg+xml',
         'swf' => 'application/x-shockwave-flash',
         'tar' => 'application/x-tar',
@@ -147,12 +149,12 @@ final class AdvancedStaticFilesServer implements RequestHandlerInterface, Bootab
             $extension = pathinfo(pathinfo($path, PATHINFO_FILENAME), PATHINFO_EXTENSION);
         }
 
-        if (!isset(self::FILE_EXTENSION_MIME_TYPE_MAP[$extension])) {
+        if (!file_exists($path)) {
             return false;
         }
 
-        if (!file_exists($path)) {
-            return false;
+        if (!isset(self::FILE_EXTENSION_MIME_TYPE_MAP[$extension])) {
+            $extension = '*';
         }
 
         $this->cachedMimeTypes[$path] = self::FILE_EXTENSION_MIME_TYPE_MAP[$extension];
