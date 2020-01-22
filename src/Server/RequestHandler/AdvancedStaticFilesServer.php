@@ -144,6 +144,10 @@ final class AdvancedStaticFilesServer implements RequestHandlerInterface, Bootab
     {
         $extension = pathinfo($path, PATHINFO_EXTENSION);
 
+        if (trim($extension) === "") {
+            return false;
+        }
+
         // eg. "file.js.map"
         if ('map' === $extension) {
             $extension = pathinfo(pathinfo($path, PATHINFO_FILENAME), PATHINFO_EXTENSION);
