@@ -7,8 +7,6 @@ namespace K911\Swoole\Server\RequestHandler\ExceptionHandler;
 use ErrorException;
 use K911\Swoole\Bridge\Symfony\HttpFoundation\RequestFactoryInterface;
 use K911\Swoole\Bridge\Symfony\HttpFoundation\ResponseProcessorInterface;
-use ReflectionClass;
-use ReflectionException;
 use Swoole\Http\Request;
 use Swoole\Http\Response;
 use Symfony\Component\ErrorHandler\ErrorHandler;
@@ -81,7 +79,6 @@ final class ProductionExceptionHandler implements ExceptionHandlerInterface
 
     /**
      * @return Callable
-     * @throws ReflectionException
      */
     private function getExceptionHandler(): Callable
     {
@@ -89,20 +86,18 @@ final class ProductionExceptionHandler implements ExceptionHandlerInterface
             return $this->exceptionHandler;
         }
 
+        $privateHandler = function (HttpKernelInterface $kernel, Throwable $e) {
+            $request = $kernel->requestStack->getMasterRequest();
+            $type = HttpKernelInterface::MASTER_REQUEST;
+
+            return $kernel->handleThrowable($e, $request, $type);
+        };
+
+        $privateHandler = $privateHandler->bind($privateHandler, null, $this->kernel);
         $kernel = $this->kernel;
-        $reflClass = new ReflectionClass(get_class($kernel));
-        $reflMethod = $reflClass->getMethod('handleThrowable');
-        $reflMethod->setAccessible(true);
-        $reflProperty = $reflClass->getProperty('requestStack');
-        $reflProperty->setAccessible(true);
-        $requestStack = $reflProperty->getValue($kernel);
 
-        return $this->exceptionHandler = static function () use ($kernel, $requestStack, $reflMethod) {
-            $args = func_get_args();
-            $args[] = $requestStack->getMasterRequest();
-            $args[] = HttpKernelInterface::MASTER_REQUEST;
-
-            return $reflMethod->invokeArgs($kernel, $args);
+        return $this->exceptionHandler = function(Throwable $e) use ($privateHandler, $kernel) {
+            return $privateHandler($kernel, $e);
         };
     }
 }
