@@ -19,6 +19,10 @@ services:
     K911\Swoole\Server\RequestHandler\ExceptionHandler\ExceptionHandlerInterface:
 
     K911\Swoole\Server\RequestHandler\ExceptionHandler\ProductionExceptionHandler:
+        arguments:
+            - '@http_kernel'
+            - '@K911\Swoole\Bridge\Symfony\HttpFoundation\RequestFactoryInterface'
+            - '@K911\Swoole\Bridge\Symfony\HttpFoundation\ResponseProcessorInterface'
 
     K911\Swoole\Server\RequestHandler\ExceptionHandler\JsonExceptionHandler:
         arguments:
