@@ -71,7 +71,7 @@ final class HttpClient implements \Serializable
      */
     public function connect(int $timeout = 3, int $step = 1): bool
     {
-        $start = \microtime(true);
+        $start = microtime(true);
         $max = $start + $timeout;
 
         do {
@@ -85,7 +85,7 @@ final class HttpClient implements \Serializable
                 }
             }
             Coroutine::sleep($step);
-            $now = \microtime(true);
+            $now = microtime(true);
         } while ($now < $max);
 
         return false;
@@ -121,7 +121,7 @@ final class HttpClient implements \Serializable
      */
     public function serialize(): string
     {
-        return \json_encode([
+        return json_encode([
             'host' => $this->client->host,
             'port' => $this->client->port,
             'ssl' => $this->client->ssl,
@@ -136,7 +136,7 @@ final class HttpClient implements \Serializable
      */
     public function unserialize($serialized): void
     {
-        $spec = \json_decode($serialized, true, 512, \JSON_THROW_ON_ERROR);
+        $spec = json_decode($serialized, true, 512, \JSON_THROW_ON_ERROR);
         $this->client = self::makeSwooleClient($spec['host'], $spec['port'], $spec['ssl'], $spec['options']);
     }
 
@@ -169,7 +169,7 @@ final class HttpClient implements \Serializable
      */
     private function serializeRequestData(Client $client, $data): void
     {
-        $json = \json_encode($data, \JSON_THROW_ON_ERROR);
+        $json = json_encode($data, \JSON_THROW_ON_ERROR);
         $client->requestHeaders[Http::HEADER_CONTENT_TYPE] = Http::CONTENT_TYPE_APPLICATION_JSON;
         $client->setData($json);
     }
@@ -227,11 +227,11 @@ final class HttpClient implements \Serializable
 
         $this->assertHasContentType($client);
         $fullContentType = $client->headers[Http::HEADER_CONTENT_TYPE];
-        $contentType = \explode(';', $fullContentType)[0];
+        $contentType = explode(';', $fullContentType)[0];
 
         switch ($contentType) {
             case Http::CONTENT_TYPE_APPLICATION_JSON:
-                return \json_decode($client->body, true, 512, \JSON_THROW_ON_ERROR);
+                return json_decode($client->body, true, 512, \JSON_THROW_ON_ERROR);
             case Http::CONTENT_TYPE_TEXT_PLAIN:
             case Http::CONTENT_TYPE_TEXT_HTML:
                 return $client->body;

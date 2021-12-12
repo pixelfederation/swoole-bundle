@@ -48,18 +48,18 @@ function get_max_memory(): int
         return 134217728; // 128 * 1024 * 1024 default 128mb
     }
     // if set to exact byte
-    if (\is_numeric($memoryLimit)) {
+    if (is_numeric($memoryLimit)) {
         return (int) $memoryLimit;
     }
 
     // if short hand version http://php.net/manual/en/faq.using.php#faq.using.shorthandbytes
-    $shortHandMemoryLimit = (int) \mb_substr($memoryLimit, 0, -1);
+    $shortHandMemoryLimit = (int) mb_substr($memoryLimit, 0, -1);
 
     return $shortHandMemoryLimit * [
         'g' => 1073741824, // 1024 * 1024 * 1024
         'm' => 1048576, // 1024 * 1024
         'k' => 1024,
-    ][\mb_strtolower(\mb_substr($memoryLimit, -1))];
+    ][mb_strtolower(mb_substr($memoryLimit, -1))];
 }
 
 function format_bytes(int $bytes): string
@@ -76,7 +76,7 @@ function format_bytes(int $bytes): string
         $bytes /= 1024;
     }
 
-    return \sprintf('%s %s', (string) \round($bytes, 2), $labels[$i]);
+    return sprintf('%s %s', (string) round($bytes, 2), $labels[$i]);
 }
 
 /**
@@ -93,15 +93,15 @@ function decode_string_as_set(?string $stringSet, string $separator = ',', array
         return [];
     }
 
-    $stringSet = \str_replace($stripChars, '', $stringSet);
-    $separator = \trim($separator);
+    $stringSet = str_replace($stripChars, '', $stringSet);
+    $separator = trim($separator);
 
     if ('' === $separator) {
-        throw new UnexpectedValueException(\sprintf('Invalid separator: \'%s\'.', $separator));
+        throw new UnexpectedValueException(sprintf('Invalid separator: \'%s\'.', $separator));
     }
 
     /** @var string[] $set */
-    $set = \explode($separator, $stringSet);
+    $set = explode($separator, $stringSet);
 
     return $set;
 }

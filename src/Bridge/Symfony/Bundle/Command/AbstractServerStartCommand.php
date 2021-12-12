@@ -116,9 +116,9 @@ abstract class AbstractServerStartCommand extends Command
 
         $sockets = $this->serverConfiguration->getSockets();
         $serverSocket = $sockets->getServerSocket();
-        $io->success(\sprintf('Swoole HTTP Server started on http://%s', $serverSocket->addressPort()));
+        $io->success(sprintf('Swoole HTTP Server started on http://%s', $serverSocket->addressPort()));
         if ($sockets->hasApiSocket()) {
-            $io->success(\sprintf('API Server started on http://%s', $sockets->getApiSocket()->addressPort()));
+            $io->success(sprintf('API Server started on http://%s', $sockets->getApiSocket()->addressPort()));
         }
         $io->table(['Configuration', 'Values'], $this->prepareConfigurationRowsToPrint($this->serverConfiguration, $runtimeConfiguration));
 
@@ -162,7 +162,7 @@ abstract class AbstractServerStartCommand extends Command
             $sockets->changeApiSocket(new Socket('0.0.0.0', (int) $apiPort));
         }
 
-        if (\filter_var($input->getOption('serve-static'), \FILTER_VALIDATE_BOOLEAN)) {
+        if (filter_var($input->getOption('serve-static'), \FILTER_VALIDATE_BOOLEAN)) {
             $publicDir = $input->getOption('public-dir');
             Assertion::string($publicDir, 'Public dir must be a valid path');
             $serverConfiguration->enableServingStaticFiles($publicDir);
@@ -182,7 +182,7 @@ abstract class AbstractServerStartCommand extends Command
         Assertion::isArray($runtimeConfiguration['trustedProxies']);
         if (\in_array('*', $runtimeConfiguration['trustedProxies'], true)) {
             $runtimeConfiguration['trustAllProxies'] = true;
-            $runtimeConfiguration['trustedProxies'] = \array_filter($runtimeConfiguration['trustedProxies'], fn (string $trustedProxy): bool => '*' !== $trustedProxy);
+            $runtimeConfiguration['trustedProxies'] = array_filter($runtimeConfiguration['trustedProxies'], fn (string $trustedProxy): bool => '*' !== $trustedProxy);
         }
 
         return $runtimeConfiguration;
@@ -198,20 +198,20 @@ abstract class AbstractServerStartCommand extends Command
     {
         $rows = [
             ['env', $this->parameterBag->get('kernel.environment')],
-            ['debug', \var_export($this->parameterBag->get('kernel.debug'), true)],
+            ['debug', var_export($this->parameterBag->get('kernel.debug'), true)],
             ['running_mode', $serverConfiguration->getRunningMode()],
             ['worker_count', $serverConfiguration->getWorkerCount()],
             ['reactor_count', $serverConfiguration->getReactorCount()],
             ['worker_max_request', $serverConfiguration->getMaxRequest()],
             ['worker_max_request_grace', $serverConfiguration->getMaxRequestGrace()],
             ['memory_limit', format_bytes(get_max_memory())],
-            ['trusted_hosts', \implode(', ', $runtimeConfiguration['trustedHosts'])],
+            ['trusted_hosts', implode(', ', $runtimeConfiguration['trustedHosts'])],
         ];
 
         if (isset($runtimeConfiguration['trustAllProxies'])) {
             $rows[] = ['trusted_proxies', '*'];
         } else {
-            $rows[] = ['trusted_proxies', \implode(', ', $runtimeConfiguration['trustedProxies'])];
+            $rows[] = ['trusted_proxies', implode(', ', $runtimeConfiguration['trustedProxies'])];
         }
 
         if ($this->serverConfiguration->hasPublicDir()) {
@@ -257,10 +257,10 @@ abstract class AbstractServerStartCommand extends Command
             $xdebugHandler->forwardSignals($restartedProcess);
 
             $io->note('Restarting command without Xdebug..');
-            $io->comment(\sprintf(
+            $io->comment(sprintf(
                 "%s\n%s",
                 'Swoole is incompatible with Xdebug. Check https://github.com/swoole/swoole-src/issues/1681 for more information.',
-                \sprintf('Set environment variable "%s=1" to use it anyway.', $xdebugHandler->allowXdebugEnvName())
+                sprintf('Set environment variable "%s=1" to use it anyway.', $xdebugHandler->allowXdebugEnvName())
             ));
 
             if ($this->testing) {
@@ -276,7 +276,7 @@ abstract class AbstractServerStartCommand extends Command
             exit($restartedProcess->getExitCode());
         }
 
-        $io->warning(\sprintf(
+        $io->warning(sprintf(
             "Xdebug is enabled! Command could not be restarted automatically due to lack of \"pcntl\" extension.\nPlease either disable Xdebug or set environment variable \"%s=1\" to disable this message.",
             $xdebugHandler->allowXdebugEnvName()
         ));

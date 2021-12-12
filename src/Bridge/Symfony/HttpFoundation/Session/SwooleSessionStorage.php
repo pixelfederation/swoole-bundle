@@ -121,7 +121,7 @@ final class SwooleSessionStorage implements SessionStorageInterface
 
         $this->storage->set(
             $this->currentId,
-            \json_encode($this->data, \JSON_THROW_ON_ERROR),
+            json_encode($this->data, \JSON_THROW_ON_ERROR),
             $this->sessionLifetimeSeconds
         );
     }
@@ -173,7 +173,7 @@ final class SwooleSessionStorage implements SessionStorageInterface
             throw new LogicException('Cannot set session ID after the session has started.');
         }
 
-        $this->currentId = \preg_match('/^[a-f0-9]{63}$/', $id) ? $id : $this->generateId();
+        $this->currentId = preg_match('/^[a-f0-9]{63}$/', $id) ? $id : $this->generateId();
     }
 
     /**
@@ -200,7 +200,7 @@ final class SwooleSessionStorage implements SessionStorageInterface
     public function getBag($name): SessionBagInterface
     {
         if (!isset($this->bags[$name])) {
-            throw new \InvalidArgumentException(\sprintf('The SessionBagInterface `%s` is not registered.', $name));
+            throw new \InvalidArgumentException(sprintf('The SessionBagInterface `%s` is not registered.', $name));
         }
 
         if (!$this->started) {
@@ -233,7 +233,7 @@ final class SwooleSessionStorage implements SessionStorageInterface
     private function setLifetimeSeconds(int $lifetimeSeconds): void
     {
         $this->sessionLifetimeSeconds = $lifetimeSeconds;
-        \ini_set('session.cookie_lifetime', (string) $lifetimeSeconds);
+        ini_set('session.cookie_lifetime', (string) $lifetimeSeconds);
     }
 
     /**
@@ -251,7 +251,7 @@ final class SwooleSessionStorage implements SessionStorageInterface
 
         Assertion::string($sessionData);
 
-        return \json_decode($sessionData, true, 512, \JSON_THROW_ON_ERROR);
+        return json_decode($sessionData, true, 512, \JSON_THROW_ON_ERROR);
     }
 
     /**
@@ -279,7 +279,7 @@ final class SwooleSessionStorage implements SessionStorageInterface
      */
     private function generateId(): string
     {
-        return \mb_substr(\bin2hex(\random_bytes(32)), \random_int(0, 1), 63);
+        return mb_substr(bin2hex(random_bytes(32)), random_int(0, 1), 63);
     }
 
     private function setMetadataBag(?MetadataBag $metadataBag = null): void

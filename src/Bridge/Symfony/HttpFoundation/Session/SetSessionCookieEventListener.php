@@ -33,7 +33,7 @@ final class SetSessionCookieEventListener implements EventSubscriberInterface
 
     public function onKernelRequest(RequestEvent $event): void
     {
-        if (!$event->isMasterRequest()) {
+        if (!$event->isMainRequest()) {
             return;
         }
 
@@ -48,7 +48,7 @@ final class SetSessionCookieEventListener implements EventSubscriberInterface
 
     public function onKernelResponse(ResponseEvent $event): void
     {
-        if (!$event->isMasterRequest() || !$this->isSessionRelated($event)) {
+        if (!$event->isMainRequest() || !$this->isSessionRelated($event)) {
             return;
         }
 
@@ -69,7 +69,7 @@ final class SetSessionCookieEventListener implements EventSubscriberInterface
 
     public function onFinishRequest(FinishRequestEvent $event): void
     {
-        if (!$event->isMasterRequest() || !$this->isSessionRelated($event)) {
+        if (!$event->isMainRequest() || !$this->isSessionRelated($event)) {
             return;
         }
 
@@ -101,7 +101,7 @@ final class SetSessionCookieEventListener implements EventSubscriberInterface
         return new Cookie(
             $session->getName(),
             $session->getId(),
-            0 === $this->sessionCookieParameters['lifetime'] ? 0 : \time() + $this->sessionCookieParameters['lifetime'],
+            0 === $this->sessionCookieParameters['lifetime'] ? 0 : time() + $this->sessionCookieParameters['lifetime'],
             $this->sessionCookieParameters['path'],
             $this->sessionCookieParameters['domain'],
             $this->sessionCookieParameters['secure'],
@@ -113,10 +113,10 @@ final class SetSessionCookieEventListener implements EventSubscriberInterface
 
     private function mergeCookieParams(array $sessionOptions): array
     {
-        $params = \session_get_cookie_params() + ['samesite' => null];
+        $params = session_get_cookie_params() + ['samesite' => null];
         foreach ($sessionOptions as $k => $v) {
-            if (0 === \mb_strpos($k, 'cookie_')) {
-                $params[\mb_substr($k, 7)] = $v;
+            if (0 === mb_strpos($k, 'cookie_')) {
+                $params[mb_substr($k, 7)] = $v;
             }
         }
 

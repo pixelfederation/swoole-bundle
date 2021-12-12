@@ -12,6 +12,9 @@ use K911\Swoole\Bridge\Symfony\HttpFoundation\CloudFrontRequestFactory;
 use K911\Swoole\Bridge\Symfony\HttpFoundation\RequestFactoryInterface;
 use K911\Swoole\Bridge\Symfony\HttpFoundation\Session\SetSessionCookieEventListener;
 use K911\Swoole\Bridge\Symfony\HttpFoundation\TrustAllProxiesRequestHandler;
+use K911\Swoole\Bridge\Symfony\HttpKernel\CoroutineHttpKernelRequestHandler;
+use K911\Swoole\Bridge\Symfony\HttpKernel\CoroutineKernelPool;
+use K911\Swoole\Bridge\Symfony\HttpKernel\KernelPoolInterface;
 use K911\Swoole\Bridge\Symfony\Messenger\SwooleServerTaskTransportFactory;
 use K911\Swoole\Bridge\Symfony\Messenger\SwooleServerTaskTransportHandler;
 use K911\Swoole\Bridge\Upscale\Blackfire\WithProfiler;
@@ -77,7 +80,7 @@ final class SwooleExtension extends Extension implements PrependExtensionInterfa
 
         $this->registerHttpServer($config['http_server'], $container);
 
-        if (\interface_exists(TransportFactoryInterface::class)) {
+        if (interface_exists(TransportFactoryInterface::class)) {
             $this->registerSwooleServerTransportConfiguration($container);
         }
     }
@@ -213,6 +216,19 @@ final class SwooleExtension extends Extension implements PrependExtensionInterfa
             $settings['log_level'] = $this->isDebug($container) ? 'debug' : 'notice';
         }
 
+        if ($settings['coroutines_support']) {
+            $container->setParameter('swoole_bundle.coroutines_support.enabled', true);
+            $coroutineKernelHandler = $container->findDefinition(CoroutineHttpKernelRequestHandler::class);
+            $coroutineKernelHandler->setArgument(
+                '$decorated',
+                new Reference(CoroutineHttpKernelRequestHandler::class.'.inner')
+            );
+            $coroutineKernelHandler->setDecoratedService(RequestHandlerInterface::class, null, -1000);
+
+            $container->setAlias(KernelPoolInterface::class, CoroutineKernelPool::class);
+        }
+        unset($settings['coroutines_support']);
+
         if ('auto' === $hmr) {
             $hmr = $this->resolveAutoHMR();
         }
@@ -298,7 +314,7 @@ final class SwooleExtension extends Extension implements PrependExtensionInterfa
             ;
         }
 
-        if ($config['blackfire_profiler'] || (null === $config['blackfire_profiler'] && \class_exists(Profiler::class))) {
+        if ($config['blackfire_profiler'] || (null === $config['blackfire_profiler'] && class_exists(Profiler::class))) {
             $container->register(Profiler::class)
                 ->setClass(Profiler::class)
             ;
@@ -319,7 +335,7 @@ final class SwooleExtension extends Extension implements PrependExtensionInterfa
 
     private function registerSymfonyExceptionHandler(ContainerBuilder $container): void
     {
-        if (!\class_exists(ErrorHandler::class)) {
+        if (!class_exists(ErrorHandler::class)) {
             throw new RuntimeException('To be able to use Symfony exception handler, the "symfony/error-handler" package needs to be installed.');
         }
 
@@ -357,8 +373,8 @@ final class SwooleExtension extends Extension implements PrependExtensionInterfa
         /** @var array<string,string> */
         $bundles = $container->getParameter('kernel.bundles');
 
-        $bundleNameOnly = \str_replace('bundle', '', \mb_strtolower($bundleName));
-        $fullBundleName = \ucfirst($bundleNameOnly).'Bundle';
+        $bundleNameOnly = str_replace('bundle', '', mb_strtolower($bundleName));
+        $fullBundleName = ucfirst($bundleNameOnly).'Bundle';
 
         return isset($bundles[$fullBundleName]);
     }

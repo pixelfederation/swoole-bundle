@@ -82,7 +82,7 @@ final class Configuration implements ConfigurationInterface
                         ->arrayNode('api')
                             ->addDefaultsIfNotSet()
                             ->beforeNormalization()
-                                ->ifTrue(fn ($v): bool => \is_string($v) || \is_bool($v) || \is_numeric($v) || null === $v)
+                                ->ifTrue(fn ($v): bool => \is_string($v) || \is_bool($v) || is_numeric($v) || null === $v)
                                 ->then(function ($v): array {
                                     return [
                                         'enabled' => (bool) $v,
@@ -134,11 +134,11 @@ final class Configuration implements ConfigurationInterface
                                             $validValues = [];
 
                                             foreach ((array) $mimeTypes as $extension => $mimeType) {
-                                                $extension = \trim((string) $extension);
-                                                $mimeType = \trim((string) $mimeType);
+                                                $extension = trim((string) $extension);
+                                                $mimeType = trim((string) $mimeType);
 
                                                 if ('' === $extension || '' === $mimeType) {
-                                                    throw new InvalidTypeException(\sprintf('Invalid mime type %s for file extension %s.', $mimeType, $extension));
+                                                    throw new InvalidTypeException(sprintf('Invalid mime type %s for file extension %s.', $mimeType, $extension));
                                                 }
 
                                                 $validValues[$extension] = $mimeType;
@@ -247,6 +247,9 @@ final class Configuration implements ConfigurationInterface
                                 ->end()
                                 ->scalarNode('worker_max_request_grace')
                                     ->defaultNull()
+                                ->end()
+                                ->booleanNode('coroutines_support')
+                                    ->defaultFalse()
                                 ->end()
                             ->end()
                         ->end() // settings

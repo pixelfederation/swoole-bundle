@@ -4,11 +4,14 @@ declare(strict_types=1);
 
 namespace K911\Swoole\Tests\Fixtures\Symfony;
 
+use Doctrine\Bundle\DoctrineBundle\DoctrineBundle;
+use Doctrine\Bundle\MigrationsBundle\DoctrineMigrationsBundle;
 use Exception;
 use Generator;
 use K911\Swoole\Bridge\Symfony\Bundle\SwooleBundle;
 use K911\Swoole\Tests\Fixtures\Symfony\CoverageBundle\CoverageBundle;
 use K911\Swoole\Tests\Fixtures\Symfony\TestBundle\TestBundle;
+use PixelFederation\DoctrineResettableEmBundle\PixelFederationDoctrineResettableEmBundle;
 use Symfony\Bundle\FrameworkBundle\FrameworkBundle;
 use Symfony\Bundle\FrameworkBundle\Kernel\MicroKernelTrait;
 use Symfony\Bundle\MonologBundle\MonologBundle;
@@ -17,6 +20,7 @@ use Symfony\Bundle\WebProfilerBundle\WebProfilerBundle;
 use Symfony\Component\Config\Loader\LoaderInterface;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\HttpKernelInterface;
 use Symfony\Component\HttpKernel\Kernel;
 use Symfony\Component\Routing\Loader\Configurator\RoutingConfigurator;
@@ -35,8 +39,8 @@ class TestAppKernel extends Kernel
 
     public function __construct(string $environment, bool $debug)
     {
-        if ('_cov' === \mb_substr($environment, -4, 4)) {
-            $environment = \mb_substr($environment, 0, -4);
+        if ('_cov' === mb_substr($environment, -4, 4)) {
+            $environment = mb_substr($environment, 0, -4);
             $this->coverageEnabled = true;
         } elseif ('cov' === $environment) {
             $this->coverageEnabled = true;
@@ -48,12 +52,20 @@ class TestAppKernel extends Kernel
             $this->profilerEnabled = true;
         }
 
-        if ('_http_cache' === \mb_substr($environment, -11, 11)) {
-            $environment = \mb_substr($environment, 0, -11);
+        if ('_http_cache' === mb_substr($environment, -11, 11)) {
+            $environment = mb_substr($environment, 0, -11);
             $this->cacheKernel = new TestCacheKernel($this);
         }
 
         parent::__construct($environment, $debug);
+    }
+
+    /**
+     * for the coroutines to work properly, the kernel __clone method has to be overriden,
+     * otherwise the container wouldn't be shared between requests.
+     */
+    public function __clone()
+    {
     }
 
     /**
@@ -82,6 +94,9 @@ class TestAppKernel extends Kernel
         yield new MonologBundle();
         yield new SwooleBundle();
         yield new TestBundle();
+        yield new DoctrineBundle();
+        yield new DoctrineMigrationsBundle();
+        yield new PixelFederationDoctrineResettableEmBundle();
 
         if ($this->coverageEnabled) {
             yield new CoverageBundle();
@@ -100,7 +115,7 @@ class TestAppKernel extends Kernel
         return __DIR__.'/app';
     }
 
-    public function handle(Request $request, $type = HttpKernelInterface::MASTER_REQUEST, $catch = true)
+    public function handle(Request $request, $type = HttpKernelInterface::MASTER_REQUEST, $catch = true): Response
     {
         // Use CacheKernel if available.
         if (null !== $this->cacheKernel) {
@@ -129,7 +144,7 @@ class TestAppKernel extends Kernel
 
         $envRoutingFile = $this->getProjectDir().'/config/'.$this->environment.'/routing/routing.yaml';
 
-        if (\file_exists($envRoutingFile)) {
+        if (file_exists($envRoutingFile)) {
             $routes->import($envRoutingFile);
         }
     }
@@ -146,7 +161,7 @@ class TestAppKernel extends Kernel
         $confDir = $this->getProjectDir().'/config';
 
         $loader->load($confDir.'/*'.self::CONFIG_EXTENSIONS, 'glob');
-        if (\is_dir($confDir.'/'.$this->environment)) {
+        if (is_dir($confDir.'/'.$this->environment)) {
             $loader->load($confDir.'/'.$this->environment.'/*'.self::CONFIG_EXTENSIONS, 'glob');
         }
 

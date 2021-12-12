@@ -97,11 +97,17 @@ swoole:
 
             package_max_length: 8388608
             # in bytes, 8388608b = 8 MiB
-        
+
             worker_max_request: 0
             # integer >= 0, indicates the number of requests after which a worker reloads automatically
             # This can be useful to limit memory leaks
             worker_max_request_grace: ~
             # 'grace period' for worker reloading. If not set, default is worker_max_request / 2. Worker reloads
             # after 'worker_max_request + rand(0,worker_max_request_grace)' requests
+
+            coroutines_support: false
+            # default false. when enabled, swoole coroutine hooks for IO apis get activated
+            # (https://www.swoole.co.uk/docs/modules/swoole-coroutine-enableCoroutine) and all stateful services
+            # are being used in contextual way with multiple instances for each service
+            # (https://www.swoole.co.uk/article/isolating-variables-with-coroutine-context)
 ```
