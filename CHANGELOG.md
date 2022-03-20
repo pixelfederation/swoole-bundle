@@ -1,3 +1,11 @@
+# [0.12.0](https://github.com/pixelfederation/swoole-bundle/compare/v0.11.0...v0.12.0) (2022-03-20)
+
+[Full changelog](https://github.com/pixelfederation/swoole-bundle/compare/v0.11.0...v0.12.0)
+
+### Features
+
+* **coroutines:** ability to use coroutines in Symofny ([10568a5](https://github.com/pixelfederation/swoole-bundle/commit/10568a52fba95815c6818f25840b88b94ef2db10))
+
 # [0.11.0](https://github.com/pixelfederation/swoole-bundle/compare/v0.10.0...v0.11.0) (2022-03-20)
 
 [Full changelog](https://github.com/pixelfederation/swoole-bundle/compare/v0.10.0...v0.11.0)
