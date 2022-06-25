@@ -98,7 +98,7 @@ final class SwooleSessionStorage implements SessionStorageInterface
      *
      * @throws \Exception
      */
-    public function regenerate($destroy = false, $lifetime = null): bool
+    public function regenerate(bool $destroy = false, int $lifetime = null): bool
     {
         if ($destroy) {
             $this->storage->delete($this->currentId);
@@ -167,7 +167,7 @@ final class SwooleSessionStorage implements SessionStorageInterface
      *
      * @throws \Exception
      */
-    public function setId($id): void
+    public function setId(string $id): void
     {
         if ($this->started) {
             throw new LogicException('Cannot set session ID after the session has started.');
@@ -179,7 +179,7 @@ final class SwooleSessionStorage implements SessionStorageInterface
     /**
      * @return string
      */
-    public function getName()
+    public function getName(): string
     {
         return $this->name;
     }
@@ -197,7 +197,7 @@ final class SwooleSessionStorage implements SessionStorageInterface
      *
      * @throws \Assert\AssertionFailedException
      */
-    public function getBag($name): SessionBagInterface
+    public function getBag(string $name): SessionBagInterface
     {
         if (!isset($this->bags[$name])) {
             throw new \InvalidArgumentException(\sprintf('The SessionBagInterface `%s` is not registered.', $name));
