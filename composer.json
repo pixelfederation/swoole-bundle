@@ -141,7 +141,6 @@
         "process-timeout": 1200,
         "sort-packages": true,
         "platform": {
-            "php": "7.4.13",
             "ext-swoole": "4.5.10"
         },
         "allow-plugins": {
