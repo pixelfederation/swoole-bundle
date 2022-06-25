@@ -33,7 +33,7 @@ final class SetSessionCookieEventListener implements EventSubscriberInterface
 
     public function onKernelRequest(RequestEvent $event): void
     {
-        if (!$event->isMasterRequest()) {
+        if (!$event->isMainRequest()) {
             return;
         }
 
@@ -48,7 +48,7 @@ final class SetSessionCookieEventListener implements EventSubscriberInterface
 
     public function onKernelResponse(ResponseEvent $event): void
     {
-        if (!$event->isMasterRequest() || !$this->isSessionRelated($event)) {
+        if (!$event->isMainRequest() || !$this->isSessionRelated($event)) {
             return;
         }
 
@@ -69,7 +69,7 @@ final class SetSessionCookieEventListener implements EventSubscriberInterface
 
     public function onFinishRequest(FinishRequestEvent $event): void
     {
-        if (!$event->isMasterRequest() || !$this->isSessionRelated($event)) {
+        if (!$event->isMainRequest() || !$this->isSessionRelated($event)) {
             return;
         }
 
