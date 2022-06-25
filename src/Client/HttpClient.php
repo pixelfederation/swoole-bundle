@@ -17,7 +17,7 @@ use Swoole\Coroutine\Http\Client;
  *
  * @internal Class API is not stable, nor it is guaranteed to exists in next releases, use at own risk
  */
-final class HttpClient implements \Serializable
+final class HttpClient
 {
     private const SUPPORTED_HTTP_METHODS = [
         Http::METHOD_GET,
@@ -116,27 +116,18 @@ final class HttpClient implements \Serializable
         return $this->resolveResponse($this->client, $timeout);
     }
 
-    /**
-     * {@inheritdoc}
-     */
-    public function serialize(): string
+    public function __serialize(): array
     {
-        return \json_encode([
+        return [
             'host' => $this->client->host,
             'port' => $this->client->port,
             'ssl' => $this->client->ssl,
             'options' => $this->client->setting,
-        ], \JSON_THROW_ON_ERROR);
+        ];
     }
 
-    /**
-     * {@inheritdoc}
-     *
-     * @param string $serialized
-     */
-    public function unserialize($serialized): void
+    public function __unserialize(array $spec): void
     {
-        $spec = \json_decode($serialized, true, 512, \JSON_THROW_ON_ERROR);
         $this->client = self::makeSwooleClient($spec['host'], $spec['port'], $spec['ssl'], $spec['options']);
     }
 
