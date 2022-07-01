@@ -1,7 +1,7 @@
 framework:
     session:
         enabled: true
-        storage_id: swoole_bundle.session.table_storage
+        storage_factory_id: swoole_bundle.session.table_storage
 
 swoole:
     http_server:
