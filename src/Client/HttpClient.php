@@ -48,6 +48,21 @@ final class HttpClient
         $this->client = $client;
     }
 
+    public function __serialize(): array
+    {
+        return [
+            'host' => $this->client->host,
+            'port' => $this->client->port,
+            'ssl' => $this->client->ssl,
+            'options' => $this->client->setting,
+        ];
+    }
+
+    public function __unserialize(array $spec): void
+    {
+        $this->client = self::makeSwooleClient($spec['host'], $spec['port'], $spec['ssl'], $spec['options']);
+    }
+
     public static function fromSocket(Socket $socket, array $options = []): self
     {
         return self::fromDomain(
@@ -114,21 +129,6 @@ final class HttpClient
         $this->client->execute($path);
 
         return $this->resolveResponse($this->client, $timeout);
-    }
-
-    public function __serialize(): array
-    {
-        return [
-            'host' => $this->client->host,
-            'port' => $this->client->port,
-            'ssl' => $this->client->ssl,
-            'options' => $this->client->setting,
-        ];
-    }
-
-    public function __unserialize(array $spec): void
-    {
-        $this->client = self::makeSwooleClient($spec['host'], $spec['port'], $spec['ssl'], $spec['options']);
     }
 
     private static function makeSwooleClient(string $host, int $port = 443, bool $ssl = true, array $options = []): Client

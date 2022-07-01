@@ -163,8 +163,6 @@ final class SwooleSessionStorage implements SessionStorageInterface
     }
 
     /**
-     * @param string $id
-     *
      * @throws \Exception
      */
     public function setId(string $id): void
@@ -176,9 +174,6 @@ final class SwooleSessionStorage implements SessionStorageInterface
         $this->currentId = \preg_match('/^[a-f0-9]{63}$/', $id) ? $id : $this->generateId();
     }
 
-    /**
-     * @return string
-     */
     public function getName(): string
     {
         return $this->name;
@@ -193,8 +188,6 @@ final class SwooleSessionStorage implements SessionStorageInterface
     }
 
     /**
-     * @param string $name
-     *
      * @throws \Assert\AssertionFailedException
      */
     public function getBag(string $name): SessionBagInterface
