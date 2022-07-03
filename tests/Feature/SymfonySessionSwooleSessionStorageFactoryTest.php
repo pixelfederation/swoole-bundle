@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace K911\Swoole\Tests\Feature;
 
-final class SymfonySessionSwooleSessionIdStorageFactoryTest extends SymfonySessionSwooleSessionStorageTest
+final class SymfonySessionSwooleSessionStorageFactoryTest extends SymfonySessionSwooleSessionStorageTest
 {
     public function setUp(): void
     {

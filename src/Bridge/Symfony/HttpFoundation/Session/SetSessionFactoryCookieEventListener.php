@@ -4,30 +4,33 @@ declare(strict_types=1);
 
 namespace K911\Swoole\Bridge\Symfony\HttpFoundation\Session;
 
+use K911\Swoole\Bridge\Symfony\Event\SessionResetEvent;
 use K911\Swoole\Server\Session\StorageInterface;
+use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 use Symfony\Component\HttpFoundation\RequestStack;
-use Symfony\Component\HttpFoundation\Session\Storage\SessionStorageInterface;
 use Symfony\Component\HttpKernel\Event\FinishRequestEvent;
 
 /**
  * Sets the session in the request.
  */
-final class SetSessionCookieEventListener implements EventSubscriberInterface
+final class SetSessionFactoryCookieEventListener implements EventSubscriberInterface
 {
     use SessionCookieEventListenerTrait;
 
-    private SessionStorageInterface $sessionStorage;
+    private RequestStack $requestStack;
+
+    private EventDispatcherInterface $dispatcher;
 
     public function __construct(
-        RequestStack $requestStack,
-        SessionStorageInterface $sessionStorage,
+        RequestStack $stack,
+        EventDispatcherInterface $dispatcher,
         StorageInterface $swooleStorage,
         array $sessionOptions = []
     ) {
-        $this->requestStack = $requestStack;
-        $this->sessionStorage = $sessionStorage;
+        $this->requestStack = $stack;
         $this->swooleStorage = $swooleStorage;
+        $this->dispatcher = $dispatcher;
         $this->sessionCookieParameters = $this->mergeCookieParams($sessionOptions);
     }
 
@@ -37,8 +40,11 @@ final class SetSessionCookieEventListener implements EventSubscriberInterface
             return;
         }
 
-        if ($this->sessionStorage instanceof SwooleSessionStorage && $this->sessionStorage->isStarted()) {
-            $this->sessionStorage->reset();
+        if ($this->session()->isStarted()) {
+            $this->dispatcher->dispatch(
+                new SessionResetEvent($this->session()->getId()),
+                SessionResetEvent::NAME
+            );
         }
 
         $this->swooleStorage->garbageCollect();

@@ -209,6 +209,10 @@ final class Configuration implements ConfigurationInterface
                                     ->defaultFalse()
                                     ->treatNullLike(false)
                                 ->end()
+                                ->booleanNode('session_factory_cookie_event_listener')
+                                    ->defaultFalse()
+                                    ->treatNullLike(false)
+                                ->end()
                             ->end()
                         ->end() // drivers
                         ->arrayNode('settings')

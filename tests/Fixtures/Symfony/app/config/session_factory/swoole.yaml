@@ -6,7 +6,7 @@ framework:
 swoole:
     http_server:
         services:
-            session_cookie_event_listener: true
+            session_factory_cookie_event_listener: true
 
 parameters:
     env(COOKIE_LIFETIME): 60
