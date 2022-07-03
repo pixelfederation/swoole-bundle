@@ -16,6 +16,7 @@ final class SymfonySessionSwooleSessionIdStorageTest extends SymfonySessionSwool
         if (version_compare(Kernel::VERSION, '6.0.0', '>=')) {
             $this->markTestSkipped('Test not applicable for Symfony versions 6+.');
         }
+        // @phpstan-ignore-next-line
         $this->testingAppEnv = 'session';
     }
 }
