@@ -8,8 +8,10 @@ use K911\Swoole\Client\HttpClient;
 use K911\Swoole\Tests\Fixtures\Symfony\TestBundle\Test\ServerTestCase;
 use Swoole\Coroutine;
 
-final class SymfonySessionSwooleSessionStorageTest extends ServerTestCase
+abstract class SymfonySessionSwooleSessionStorageTest extends ServerTestCase
 {
+    protected string $testingAppEnv;
+
     protected function setUp(): void
     {
         $this->markTestSkippedIfXdebugEnabled();
@@ -23,7 +25,7 @@ final class SymfonySessionSwooleSessionStorageTest extends ServerTestCase
             '--host=localhost',
             '--port=9999',
         ], [
-            'APP_ENV' => 'session',
+            'APP_ENV' => $this->testingAppEnv,
             'COOKIE_LIFETIME' => $cookieLifetime,
         ]);
 
@@ -64,7 +66,7 @@ final class SymfonySessionSwooleSessionStorageTest extends ServerTestCase
             '--host=localhost',
             '--port=9999',
         ], [
-            'APP_ENV' => 'session',
+            'APP_ENV' => $this->testingAppEnv,
             'COOKIE_LIFETIME' => $cookieLifetime,
         ]);
 
@@ -106,7 +108,7 @@ final class SymfonySessionSwooleSessionStorageTest extends ServerTestCase
             '--host=localhost',
             '--port=9999',
         ], [
-            'APP_ENV' => 'session',
+            'APP_ENV' => $this->testingAppEnv,
             'COOKIE_LIFETIME' => $cookieLifetime,
         ]);
 
@@ -154,7 +156,7 @@ final class SymfonySessionSwooleSessionStorageTest extends ServerTestCase
             '--host=localhost',
             '--port=9999',
         ], [
-            'APP_ENV' => 'session',
+            'APP_ENV' => $this->testingAppEnv,
             'COOKIE_LIFETIME' => $cookieLifetime,
         ]);
 
@@ -202,7 +204,7 @@ final class SymfonySessionSwooleSessionStorageTest extends ServerTestCase
             '--host=localhost',
             '--port=9999',
         ], [
-            'APP_ENV' => 'session_http_cache',
+            'APP_ENV' => "{$this->testingAppEnv}_http_cache",
             'COOKIE_LIFETIME' => $cookieLifetime,
             // Only one worker to reliably verify app state is reset between requests.
             // Without it 2nd request may be handled by a different "clean" worker, which would distort test results.
