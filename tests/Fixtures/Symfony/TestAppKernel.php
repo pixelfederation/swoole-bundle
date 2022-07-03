@@ -163,4 +163,12 @@ class TestAppKernel extends Kernel
     {
         return $this->getProjectDir().'/var';
     }
+
+    /**
+     * This should always return bool, but we need to coerce it depending on the Symfony version in use.
+     */
+    public function isDebug(): bool
+    {
+        return (bool)$this->debug;
+    }
 }
