@@ -226,7 +226,11 @@ final class SwooleSessionStorage implements SessionStorageInterface
     private function setLifetimeSeconds(int $lifetimeSeconds): void
     {
         $this->sessionLifetimeSeconds = $lifetimeSeconds;
-        \ini_set('session.cookie_lifetime', (string) $lifetimeSeconds);
+        // This generates an error in some contexts if we don't check this first.
+        // Same check as Symfony session storage implementations.
+        if (!headers_sent()) {
+            \ini_set('session.cookie_lifetime', (string) $lifetimeSeconds);
+        }
     }
 
     /**
