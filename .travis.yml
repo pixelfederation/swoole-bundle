@@ -20,13 +20,24 @@ matrix:
     - php: "8.0"
       env:
         - OPENSWOOLE_LATEST=1
-        - COMPOSER_ARGS='update --ignore-platform-reqs'
+        - COMPOSER_ARGS='update'
+    - php: "8.1"
+      env:
+        - PHP_CS_FIXER_IGNORE_ENV=1
+    - php: "8.1"
+      env:
+        - OPENSWOOLE_LATEST=1
+        - COMPOSER_ARGS='update'
   fast_finish: true
   allow_failures:
     - php: "8.0"
       env:
         - OPENSWOOLE_LATEST=1
-        - COMPOSER_ARGS='update --ignore-platform-reqs'
+        - COMPOSER_ARGS='update'
+    - php: "8.1"
+      env:
+        - OPENSWOOLE_LATEST=1
+        - COMPOSER_ARGS='update'
 
 before_script:
   - phpenv config-rm xdebug.ini
