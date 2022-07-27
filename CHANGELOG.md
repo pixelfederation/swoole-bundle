@@ -1,3 +1,11 @@
+# [0.12.0](https://github.com/pixelfederation/swoole-bundle/compare/v0.11.1...v0.12.0) (2022-07-27)
+
+[Full changelog](https://github.com/pixelfederation/swoole-bundle/compare/v0.11.1...v0.12.0)
+
+### Features
+
+* **platform:** added integrations for PHP 8.1 + added support for Symfony 6 ([e90eb85](https://github.com/pixelfederation/swoole-bundle/commit/e90eb850ca3b04219ff62124c5f2ac5406d35f02))
+
 ## [0.11.1](https://github.com/pixelfederation/swoole-bundle/compare/v0.11.0...v0.11.1) (2022-03-20)
 
 [Full changelog](https://github.com/pixelfederation/swoole-bundle/compare/v0.11.0...v0.11.1)
