@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace K911\Swoole\Bridge\Symfony\Bundle\Command;
 
+use Assert\Assertion;
 use K911\Swoole\Bridge\Symfony\Bundle\Exception\CouldNotCreatePidFileException;
 use K911\Swoole\Bridge\Symfony\Bundle\Exception\PidFileNotAccessibleException;
 
@@ -20,6 +21,8 @@ use Symfony\Component\Console\Style\SymfonyStyle;
 
 final class ServerStartCommand extends AbstractServerStartCommand
 {
+    private bool $openCloseOutput = false;
+
     /**
      * {@inheritdoc}
      */
@@ -27,6 +30,7 @@ final class ServerStartCommand extends AbstractServerStartCommand
     {
         $this->setDescription('Run Swoole HTTP server in the background.')
             ->addOption('pid-file', null, InputOption::VALUE_REQUIRED, 'Pid file', $this->getProjectDirectory().'/var/swoole.pid')
+            ->addOption('open-console', null, InputOption::VALUE_NONE, 'Whatever open console output, to sent logs from php to php://stdout, php://stderr, to docker /dev/stdout, /std/error.')
         ;
 
         parent::configure();
@@ -40,6 +44,10 @@ final class ServerStartCommand extends AbstractServerStartCommand
         /** @var null|string $pidFile */
         $pidFile = $input->getOption('pid-file');
         $serverConfiguration->daemonize($pidFile);
+
+        $openConsole = $input->getOption('open-console');
+        Assertion::boolean($openConsole);
+        $this->openCloseOutput = $openConsole;
 
         parent::prepareServerConfiguration($serverConfiguration, $input);
     }
@@ -59,7 +67,9 @@ final class ServerStartCommand extends AbstractServerStartCommand
             throw CouldNotCreatePidFileException::forPath($pidFile);
         }
 
-        $this->closeSymfonyStyle($io);
+        if (false === $this->openCloseOutput) {
+            $this->closeSymfonyStyle($io);
+        }
 
         $server->start();
     }

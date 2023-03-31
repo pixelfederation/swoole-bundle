@@ -21,6 +21,12 @@ if (\class_exists(Application::class)) {
         'process_psr_3_messages' => false,
         'channels' => ['!event', '!console'],
     ];
+    $handlers['php-stdout'] = [
+        'type' => 'stream',
+        'path' => 'php://stdout',
+        'level' => 'info',
+        'channels' => ['!event'],
+    ];
 }
 
 $container->loadFromExtension('monolog', [

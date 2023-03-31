@@ -39,6 +39,41 @@ final class SwooleServerStartStopCommandTest extends ServerTestCase
         });
     }
 
+    /**
+     * If monolog path `php://stdout` in handler is used, seems stdout is still open in test even no option `--open-console`
+     * is used (and server console output is closed).
+     */
+    public function testStartWithOpenConsole(): void
+    {
+        $serverStart = $this->createConsoleProcess([
+            'swoole:server:start',
+            '--host=localhost',
+            '--port=9999',
+            '--open-console',
+        ]);
+
+        $serverStart->setTimeout(3);
+        $serverStart->enableOutput();
+        $serverStart->start();
+
+        $this->assertTrue($serverStart->isStarted());
+
+        $this->runAsCoroutineAndWait(function (): void {
+            $this->deferServerStop();
+
+            $client = HttpClient::fromDomain('localhost', 9999, false);
+            $this->assertTrue($client->connect());
+            $response = $client->send('/monologs')['response'];
+            self::assertSame(200, $response['statusCode']);
+            self::assertSame([
+                'hello' => 'world!',
+            ], $response['body']);
+        });
+
+        $errorOutput = $serverStart->getOutput();
+        $this->assertStringContainsString('php.INFO: Test app message.', $errorOutput);
+    }
+
     public function testStartCallStopOnReactorRunningMode(): void
     {
         $envs = ['APP_ENV' => 'reactor'];
