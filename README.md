@@ -1,4 +1,4 @@
-# Swoole Bundle
+# Swoole Bundle dummy test
 
 [![Maintainability](https://api.codeclimate.com/v1/badges/1d73a214622bba769171/maintainability)](https://codeclimate.com/github/pixelfederation/swoole-bundle/maintainability)
 [![Test Coverage](https://api.codeclimate.com/v1/badges/1d73a214622bba769171/test_coverage)](https://codeclimate.com/github/pixelfederation/swoole-bundle/test_coverage)
