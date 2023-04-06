@@ -134,3 +134,5 @@ php -r "echo swoole_version() . \PHP_EOL;"
 #### Installation
 
 Official GitHub repository [openswoole/swoole-src](https://github.com/openswoole/swoole-src#installation) contains comprehensive installation guide. The recommended approach is to install it [from source](https://github.com/openswoole/swoole-src#2-compile-from-source).
+
+dummy changes
