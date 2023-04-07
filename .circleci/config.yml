@@ -11,7 +11,7 @@ executors:
     docker:
       - image: docker.io/pixelfederation/release-version-script:0.3.7
     working_directory: /usr/src/app
-
+#smth
 aliases:
     # Remote Docker config
   - &docker-remote-version
